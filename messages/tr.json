@@ -1,0 +1,38 @@
+{
+  "character": {
+    "name": "Alptuğ ILDIZ",
+    "description": "Merhaba! Ben Alptuğ, modern web teknolojileriyle kullanıcı dostu, etkileşimli ve estetik arayüzler geliştiren bir yazılım mühendisiyim. Ağırlıklı olarak React, Next.js ve TypeScript ile çalışıyor, ihtiyaç duyulduğunda Vue.js, PHP ve SQL gibi teknolojilerde de yetkin çözümler sunuyorum. Performansa, sadeliğe ve güçlü bir kullanıcı deneyimine odaklanan yazılımlar geliştirmekten keyif alıyorum."
+  },
+  "header": {
+    "greeting": "selam!"
+  },
+  "experience": {
+    "title": "Tecrübelerim",
+    "items": [
+      {
+        "title": "Frontend Developer",
+        "company": "Odeon Software & Technology",
+        "period": "Mar 2023 - Günümüz",
+        "description": "React.js ve Next.js kullanarak modern, performans odaklı web arayüzleri geliştirdim. Uzak ekiplerle iş birliği içinde çevik metodolojilerle çalıştım."
+      },
+      {
+        "title": "Software Developer",
+        "company": "BadiWorks",
+        "period": "Nis 2022 - Nis 2023",
+        "description": "JavaScript ve PHP kullanarak kurumsal projelerde hem frontend hem backend geliştirmeleri yaptım. Kullanıcı deneyimini önceliklendiren çözümler ürettim."
+      },
+      {
+        "title": "Software Engineer",
+        "company": "Teklas",
+        "period": "Ağu 2020 - Ara 2021",
+        "description": "Fabrika içi dijitalleşme süreçlerinde kullanılan yazılımların geliştirilmesinde görev aldım. JavaScript ile üretim takibi uygulamaları geliştirdim."
+      },
+      {
+        "title": "Frontend Geliştirici",
+        "company": "Freelance",
+        "period": "2022 - Günümüz",
+        "description": "React, Next.js ve TypeScript kullanarak çeşitli web projelerinde kullanıcı odaklı arayüzler geliştirdim. Performans ve erişilebilirlik odaklı çözümler sundum."
+      }
+    ]
+  }
+}

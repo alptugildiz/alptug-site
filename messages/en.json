@@ -1,0 +1,38 @@
+{
+  "character": {
+    "name": "Alptuğ ILDIZ",
+    "description": "Hi! I'm Alptuğ, a software engineer passionate about creating user-friendly, interactive, and visually appealing interfaces using modern web technologies. I mainly work with React, Next.js, and TypeScript, and also provide effective solutions using technologies like Vue.js, PHP, and SQL when needed. I enjoy building software focused on performance, simplicity, and a great user experience."
+  },
+   "header": {
+    "greeting": "hiii!"
+  },
+  "experience": {
+    "title": "Experience",
+    "items": [
+      {
+        "title": "Frontend Developer",
+        "company": "Odeon Software & Technology",
+        "period": "Mar 2023 – Present",
+        "description": "Developed modern, performance-focused web interfaces using React.js and Next.js. Worked in agile methodologies collaborating with remote teams."
+      },
+      {
+        "title": "Software Developer",
+        "company": "BadiWorks",
+        "period": "Apr 2022 – Apr 2023",
+        "description": "Contributed to enterprise-level projects with JavaScript and PHP, developing both frontend and backend components. Focused on delivering user-centric solutions."
+      },
+      {
+        "title": "Software Engineer",
+        "company": "Teklas",
+        "period": "Aug 2020 – Dec 2021",
+        "description": "Worked on the development of internal software for factory digitization processes. Built production tracking tools using JavaScript."
+      },
+      {
+        "title": "Frontend Developer",
+        "company": "Freelance",
+        "period": "2022 – Present",
+        "description": "Developed user-focused interfaces in various web projects using React, Next.js, and TypeScript. Delivered solutions with an emphasis on performance and accessibility."
+      }
+    ]
+  }
+}
