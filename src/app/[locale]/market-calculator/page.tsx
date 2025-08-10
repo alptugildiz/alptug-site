@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import BackgroundLayer from "@/components/BackgroundLayer";
 import BdoMarketProfitCalculator from "@/components/BdoMarketProfitCalculator";
+import BossNextCard from "@/components/boss/BossNextCard";
+// 👈 yeni
 import { SectionEnum } from "@/enums/SectionEnum";
 
 export const metadata = {
-  title: "BDO Pazar Gelir Hesaplayıcı",
+  title: "BDO Tools",
   robots: { index: false, follow: false },
 };
 
 type SP = Record<string, string | string[] | undefined>;
 
 export default async function Page({
-  // params şu an kullanılmıyor; ESLint susması için _params
   params: _params,
   searchParams,
 }: {
@@ -19,14 +20,12 @@ export default async function Page({
   searchParams?: Promise<SP>;
 }) {
   const sp = (await searchParams) ?? {};
-
-  // helper: string | string[] | undefined → string | undefined
   const pick = (v: string | string[] | undefined) =>
     Array.isArray(v) ? v[0] : v;
 
   const idStr = pick(sp.id);
   const sidStr = pick(sp.sid) ?? "0";
-  const region = pick(sp.region) ?? "eu";
+  const region = pick(sp.region) ?? "eu"; // 👈 BossNextCard'a da vereceğiz
   const q = pick(sp.q) ?? "";
 
   const id = idStr ? Number(idStr) : undefined;
@@ -37,16 +36,23 @@ export default async function Page({
   return (
     <>
       <BackgroundLayer activeSection={activeSection} />
-      <div style={{ position: "relative", zIndex: 1000 }}>
-        <BdoMarketProfitCalculator
-          initialRegion={region}
-          initialQuery={q}
-          initialSelection={
-            id !== undefined
-              ? { id, sid: Number.isFinite(sid) ? sid : 0 }
-              : null
-          }
-        />
+      <div
+        style={{ position: "relative", zIndex: 1000 }}
+        className="mt-18 m-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+      >
+        <div className="px-4">
+          <BossNextCard region={region} />
+
+          <BdoMarketProfitCalculator
+            initialRegion={region}
+            initialQuery={q}
+            initialSelection={
+              id !== undefined
+                ? { id, sid: Number.isFinite(sid) ? sid : 0 }
+                : null
+            }
+          />
+        </div>
       </div>
     </>
   );

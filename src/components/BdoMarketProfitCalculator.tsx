@@ -3,8 +3,35 @@
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 
+// --- Collapsible card (senin yarı saydam stilin) ---
+function InfoCard({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details
+      className="bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-2xl shadow dark:text-amber-50"
+      open={defaultOpen}
+    >
+      <summary className="list-none select-none cursor-pointer px-4 py-3 flex items-center justify-between">
+        <span className="text-sm font-semibold tracking-wide uppercase opacity-80">
+          {title}
+        </span>
+        <span className="text-xs opacity-60">(aç/kapat)</span>
+      </summary>
+      <div className="p-4">{children}</div>
+    </details>
+  );
+}
+
 // ========================
 // BDO Pazar Gelir Hesaplayıcı (TR)
+// + Sıradaki Boss paneli (CSS korunarak)
 // - App Router uyumlu client bileşeni
 // - Arama & fiyat istekleri Next.js API proxy'lerinden geçer
 // - Varsayılan bölge: EU, dil: EN (item adları İngilizce kalır)
@@ -95,6 +122,16 @@ export default function BdoMarketProfitCalculator({
   const [familyFame, setFamilyFame] = useState<0 | 0.005 | 0.01 | 0.015>(0.005);
   const [quantity, setQuantity] = useState<number>(3000); // isteğine uygun varsayılan
 
+  // ---- Boss timer state (ileride boss kartı eklemek için hazır)
+  const [countdown, setCountdown] = useState<number | null>(null);
+  useEffect(() => {
+    if (countdown == null) return;
+    const t = setInterval(() => {
+      setCountdown((c) => (c == null ? c : Math.max(0, c - 1)));
+    }, 1000);
+    return () => clearInterval(t);
+  }, [countdown]);
+
   // URL parametreleri ile başlangıçta seçim
   useEffect(() => {
     if (initialSelection) {
@@ -159,229 +196,234 @@ export default function BdoMarketProfitCalculator({
   const bonusDiff = net - baseAfterTax;
   const bonusPct = baseAfterTax > 0 ? (bonusDiff / baseAfterTax) * 100 : 0;
 
+  // === RETURN: Card içine sarıldı ===
   return (
     <div className="mt-16">
-      <div className="min-h-screen w-full  text-neutral-900 dark:text-neutral-50 p-6">
-        <div className="max-w-6xl mx-auto grid gap-6">
-          {/* Üst başlık */}
-          <header className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="space-y-1">
-              <h1 className="text-3xl font-extrabold tracking-tight">
-                BDO Pazar Gelir Hesaplayıcı
-              </h1>
-              <p className="text-sm text-neutral-600 dark:text-neutral-50">
-                İsme göre ara, ürünü seç ve VP/Yüzük/Aile Ünü ile net kazancını
-                gör.
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              <label className="text-sm">Bölge</label>
-              <select
-                className="border rounded-xl px-3 py-2  bg-white/30 dark:bg-white/10
-                       backdrop-blur-md"
-                value={region}
-                onChange={(e) => setRegion(e.target.value)}
+      <InfoCard title="BDO Pazar Gelir Hesaplayıcı" defaultOpen>
+        <div className="w-full  text-neutral-900 dark:text-neutral-50 p-6">
+          <div className="max-w-6xl mx-auto grid gap-6">
+            {/* Üst başlık */}
+            <header className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="space-y-1">
+                <h1 className="text-3xl font-extrabold tracking-tight">
+                  BDO Pazar Gelir Hesaplayıcı
+                </h1>
+                <p className="text-sm text-neutral-600 dark:text-neutral-50">
+                  İsme göre ara, ürünü seç ve VP/Yüzük/Aile Ünü ile net
+                  kazancını gör.
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-sm">Bölge</label>
+                <select
+                  className="border rounded-xl px-3 py-2  bg-white/30 dark:bg-neutral-800/70
+                         backdrop-blur-md"
+                  value={region}
+                  onChange={(e) => setRegion(e.target.value)}
+                >
+                  {REGIONS.map((r) => (
+                    <option key={r.code} value={r.code}>
+                      {r.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </header>
+
+            {/* Üst grid */}
+            <div className="grid md:grid-cols-3 gap-4">
+              {/* Arama + sonuçlar */}
+              <div
+                className="md:col-span-2 bg-white/30 dark:bg-white/10
+                         backdrop-blur-md rounded-2xl shadow p-4"
               >
-                {REGIONS.map((r) => (
-                  <option key={r.code} value={r.code}>
-                    {r.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </header>
-
-          {/* Üst grid */}
-          <div className="grid md:grid-cols-3 gap-4">
-            {/* Arama + sonuçlar */}
-            <div
-              className="md:col-span-2 bg-white/30 dark:bg-white/10
-                       backdrop-blur-md rounded-2xl shadow p-4"
-            >
-              <div className="flex items-center gap-3 mb-3">
-                <input
-                  className="w-full border rounded-xl px-3 py-2 focus:outline-none"
-                  placeholder="İsimle ara (örn: Black Stone, Blackstar)"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-              </div>
-              <div className="max-h-80 overflow-auto divide-y">
-                {results.map((it) => (
-                  <button
-                    key={`${it.id}-${it.sid}`}
-                    onClick={() => setSelected(it)}
-                    className={`w-full flex items-center gap-3 text-left px-2 py-2 hover:bg-neutral-50 ${
-                      selected?.id === it.id && selected?.sid === it.sid
-                        ? "bg-neutral-100"
-                        : ""
-                    }`}
-                  >
-                    {it.icon && (
-                      <img src={it.icon} alt="" className="w-8 h-8 rounded" />
-                    )}
-                    <div className="flex-1">
-                      <div className="font-medium">{it.name}</div>
-                      <div className="text-xs text-neutral-500 dark:text-neutral-50">
-                        ID: {it.id} • SID: {it.sid}{" "}
-                        {it.basePrice
-                          ? `• Base: ${it.basePrice.toLocaleString()}`
-                          : ""}
+                <div className="flex items-center gap-3 mb-3">
+                  <input
+                    className="w-full border rounded-xl px-3 py-2 focus:outline-none"
+                    placeholder="İsimle ara (örn: Black Stone, Blackstar)"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                  />
+                </div>
+                <div className="max-h-80 overflow-auto divide-y">
+                  {results.map((it) => (
+                    <button
+                      key={`${it.id}-${it.sid}`}
+                      onClick={() => setSelected(it)}
+                      className={`w-full flex items-center gap-3 text-left px-2 py-2 hover:bg-neutral-50 dark:hover:bg-neutral-700/30 ${
+                        selected?.id === it.id && selected?.sid === it.sid
+                          ? "bg-neutral-100 dark:bg-neutral-700/30"
+                          : ""
+                      }`}
+                    >
+                      {it.icon && (
+                        <img src={it.icon} alt="" className="w-8 h-8 rounded" />
+                      )}
+                      <div className="flex-1">
+                        <div className="font-medium">{it.name}</div>
+                        <div className="text-xs text-neutral-500 dark:text-neutral-50">
+                          ID: {it.id} • SID: {it.sid}{" "}
+                          {it.basePrice
+                            ? `• Base: ${it.basePrice.toLocaleString()}`
+                            : ""}
+                        </div>
                       </div>
+                    </button>
+                  ))}
+                  {results.length === 0 && debouncedQuery && (
+                    <div className="text-sm text-neutral-500 dark:text-neutral-50 p-3">
+                      Sonuç yok — bölgiyi değiştirip tekrar dene.
                     </div>
-                  </button>
-                ))}
-                {results.length === 0 && debouncedQuery && (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-50 p-3">
-                    Sonuç yok — bölgiyi değiştirip tekrar dene.
-                  </div>
-                )}
-                {!debouncedQuery && (
-                  <div className="text-sm text-neutral-500 dark:text-neutral-50 p-3">
-                    Aramak için yaz…
-                  </div>
-                )}
+                  )}
+                  {!debouncedQuery && (
+                    <div className="text-sm text-neutral-500 dark:text-neutral-50 p-3">
+                      Aramak için yaz…
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Bonuslar & Adet */}
+              <div
+                className=" bg-white/30 dark:bg-white/10
+                         backdrop-blur-md rounded-2xl shadow p-4 grid gap-3 h-fit"
+              >
+                <div className="font-semibold">Vergi ve Bonuslar</div>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={valuePack}
+                    onChange={(e) => setValuePack(e.target.checked)}
+                  />
+                  Value Pack (+%30)
+                </label>
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={ring}
+                    onChange={(e) => setRing(e.target.checked)}
+                  />
+                  Rich Merchant`s Ring (+%5)
+                </label>
+                <div className="text-sm">Aile Ünü Bonusu</div>
+                <select
+                  className="border rounded-xl px-3 py-2 bg-white/30 dark:bg-white/10
+                         backdrop-blur-md text-sm"
+                  value={familyFame}
+                  onChange={(e) => setFamilyFame(Number(e.target.value) as any)}
+                >
+                  <option value={0}>Yok</option>
+                  <option value={0.005}>1000-3999 (+%0.5)</option>
+                  <option value={0.01}>4000-6999 (+%1.0)</option>
+                  <option value={0.015}>7000+ (+%1.5)</option>
+                </select>
+                <div className="h-px bg-neutral-200" />
+                <div className="font-semibold">Adet</div>
+                <input
+                  type="number"
+                  min={1}
+                  className="border rounded px-2 py-1 w-28"
+                  value={quantity}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, Number(e.target.value) || 1))
+                  }
+                />
+                <div className="text-xs text-neutral-600 dark:text-neutral-50">
+                  Toplam Net = Net × Adet
+                </div>
               </div>
             </div>
 
-            {/* Bonuslar & Adet */}
+            {/* Seçili ürün & sonuç kartları */}
             <div
               className=" bg-white/30 dark:bg-white/10
-                       backdrop-blur-md rounded-2xl shadow p-4 grid gap-3 h-fit"
+                         backdrop-blur-md rounded-2xl shadow p-4 grid gap-3"
             >
-              <div className="font-semibold">Vergi ve Bonuslar</div>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={valuePack}
-                  onChange={(e) => setValuePack(e.target.checked)}
-                />
-                Value Pack (+%30)
-              </label>
-              <label className="flex items-center gap-2 text-sm">
-                <input
-                  type="checkbox"
-                  checked={ring}
-                  onChange={(e) => setRing(e.target.checked)}
-                />
-                Rich Merchant`s Ring (+%5)
-              </label>
-              <div className="text-sm">Aile Ünü Bonusu</div>
-              <select
-                className="border rounded-xl px-3 py-2 bg-white/30 dark:bg-white/10
-                       backdrop-blur-md text-sm"
-                value={familyFame}
-                onChange={(e) => setFamilyFame(Number(e.target.value) as any)}
-              >
-                <option value={0}>Yok</option>
-                <option value={0.005}>1000-3999 (+%0.5)</option>
-                <option value={0.01}>4000-6999 (+%1.0)</option>
-                <option value={0.015}>7000+ (+%1.5)</option>
-              </select>
-              <div className="h-px bg-neutral-200" />
-              <div className="font-semibold">Adet</div>
-              <input
-                type="number"
-                min={1}
-                className="border rounded px-2 py-1 w-28"
-                value={quantity}
-                onChange={(e) =>
-                  setQuantity(Math.max(1, Number(e.target.value) || 1))
-                }
-              />
-              <div className="text-xs text-neutral-600 dark:text-neutral-50">
-                Toplam Net = Net × Adet
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="font-semibold">Seçilen Ürün</div>
+                {price?.lastUpdated && (
+                  <div className="text-xs text-neutral-500 dark:text-neutral-50">
+                    Güncellik: {new Date(price.lastUpdated).toLocaleString()}
+                  </div>
+                )}
               </div>
-            </div>
-          </div>
 
-          {/* Seçili ürün & sonuç kartları */}
-          <div
-            className=" bg-white/30 dark:bg-white/10
-                       backdrop-blur-md rounded-2xl shadow p-4 grid gap-3"
-          >
-            <div className="flex items-center justify-between flex-wrap gap-2">
-              <div className="font-semibold">Seçilen Ürün</div>
-              {price?.lastUpdated && (
-                <div className="text-xs text-neutral-500 dark:text-neutral-50">
-                  Güncellik: {new Date(price.lastUpdated).toLocaleString()}
+              {selected && price ? (
+                <div className="grid md:grid-cols-3 gap-4 items-stretch">
+                  <div className="md:col-span-2 flex items-center gap-3">
+                    {price.icon && (
+                      <img
+                        src={price.icon}
+                        alt=""
+                        className="w-10 h-10 rounded"
+                      />
+                    )}
+                    <div>
+                      <div className="text-lg font-semibold ">
+                        {price.name || `Item ${price.id}`}
+                      </div>
+                      <div className="text-sm text-neutral-600 dark:text-neutral-50">
+                        ID: {price.id} • SID: {price.sid}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="grid gap-1 text-right">
+                    <div className="text-sm text-neutral-500 dark:text-neutral-50">
+                      Kullanılan liste fiyatı
+                    </div>
+                    <div className="text-xl font-bold">
+                      {sellPrice.toLocaleString()}{" "}
+                      <span className="text-sm font-normal dark:text-neutral-500">
+                        silver
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-3 grid sm:grid-cols-4 gap-4">
+                    <div className="rounded-xl bg-neutral-50 dark:bg-neutral-500/30 p-3">
+                      <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
+                        Vergi sonrası (bonus yok)
+                      </div>
+                      <div className="text-lg font-semibold">
+                        {baseAfterTax.toLocaleString()} silver
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-neutral-50 dark:bg-neutral-500/30 p-3">
+                      <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
+                        Seçili bonuslarla net
+                      </div>
+                      <div className="text-2xl font-extrabold">
+                        {net.toLocaleString()} silver
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-neutral-50 p-3 dark:bg-neutral-500/30">
+                      <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
+                        Bonus etkisi
+                      </div>
+                      <div className="text-lg font-semibold">
+                        {bonusDiff.toLocaleString()} silver (+
+                        {bonusPct.toFixed(1)}%)
+                      </div>
+                    </div>
+                    <div className="rounded-xl bg-emerald-200 dark:bg-neutral-400/30 p-3">
+                      <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
+                        Toplam (Adet × Net)
+                      </div>
+                      <div className="text-xl font-bold">
+                        {totalRevenue.toLocaleString()} silver
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-neutral-500 dark:text-neutral-50">
+                  Soldan bir ürün seçin veya yukarıdan Manuel Getir`i kullanın.
                 </div>
               )}
             </div>
-
-            {selected && price ? (
-              <div className="grid md:grid-cols-3 gap-4 items-stretch">
-                <div className="md:col-span-2 flex items-center gap-3">
-                  {price.icon && (
-                    <img
-                      src={price.icon}
-                      alt=""
-                      className="w-10 h-10 rounded"
-                    />
-                  )}
-                  <div>
-                    <div className="text-lg font-semibold">
-                      {price.name || `Item ${price.id}`}
-                    </div>
-                    <div className="text-sm text-neutral-600 dark:text-neutral-50">
-                      ID: {price.id} • SID: {price.sid}
-                    </div>
-                  </div>
-                </div>
-                <div className="grid gap-1 text-right">
-                  <div className="text-sm text-neutral-500 dark:text-neutral-50">
-                    Kullanılan liste fiyatı
-                  </div>
-                  <div className="text-xl font-bold">
-                    {sellPrice.toLocaleString()}{" "}
-                    <span className="text-sm font-normal">silver</span>
-                  </div>
-                </div>
-
-                <div className="md:col-span-3 grid sm:grid-cols-4 gap-4">
-                  <div className="rounded-xl bg-neutral-50 p-3">
-                    <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
-                      Vergi sonrası (bonus yok)
-                    </div>
-                    <div className="text-lg font-semibold">
-                      {baseAfterTax.toLocaleString()} silver
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-neutral-50 p-3">
-                    <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
-                      Seçili bonuslarla net
-                    </div>
-                    <div className="text-2xl font-extrabold">
-                      {net.toLocaleString()} silver
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-neutral-50 p-3">
-                    <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
-                      Bonus etkisi
-                    </div>
-                    <div className="text-lg font-semibold">
-                      {bonusDiff.toLocaleString()} silver (+
-                      {bonusPct.toFixed(1)}%)
-                    </div>
-                  </div>
-                  <div className="rounded-xl bg-emerald-200 p-3">
-                    <div className="text-xs text-neutral-500 dark:text-neutral-50 mb-1">
-                      Toplam (Adet × Net)
-                    </div>
-                    <div className="text-xl font-bold">
-                      {totalRevenue.toLocaleString()} silver
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="text-sm text-neutral-500 dark:text-neutral-50">
-                Soldan bir ürün seçin veya yukarıdan Manuel Getir`i kullanın.
-              </div>
-            )}
           </div>
         </div>
-      </div>
+      </InfoCard>
     </div>
   );
 }
