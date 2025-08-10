@@ -18,10 +18,6 @@ export default function HomePage() {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    console.log("Aktif section:", activeSection);
-  }, [activeSection]);
-
   if (!mounted) return null;
 
   return (

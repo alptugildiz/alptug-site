@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import BackgroundLayer from "@/components/BackgroundLayer";
 import BdoMarketProfitCalculator from "@/components/BdoMarketProfitCalculator";
+import { SectionEnum } from "@/enums/SectionEnum";
 
 export const metadata = {
   title: "BDO Pazar Gelir Hesaplayıcı",
@@ -30,11 +32,22 @@ export default async function Page({
   const id = idStr ? Number(idStr) : undefined;
   const sid = Number(sidStr);
 
+  const activeSection = SectionEnum.Hero;
+
   return (
-    <BdoMarketProfitCalculator
-      initialRegion={region}
-      initialQuery={q}
-      initialSelection={id !== undefined ? { id, sid: Number.isFinite(sid) ? sid : 0 } : null}
-    />
+    <>
+      <BackgroundLayer activeSection={activeSection} />
+      <div style={{ position: "relative", zIndex: 1000 }}>
+        <BdoMarketProfitCalculator
+          initialRegion={region}
+          initialQuery={q}
+          initialSelection={
+            id !== undefined
+              ? { id, sid: Number.isFinite(sid) ? sid : 0 }
+              : null
+          }
+        />
+      </div>
+    </>
   );
 }
