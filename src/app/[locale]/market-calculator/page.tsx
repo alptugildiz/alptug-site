@@ -1,18 +1,40 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import BdoMarketProfitCalculator from "@/components/BdoMarketProfitCalculator";
 
 export const metadata = {
-  title: "BDO Market Hesaplayıcı",
+  title: "BDO Pazar Gelir Hesaplayıcı",
   robots: { index: false, follow: false },
 };
 
-export default function Page({ searchParams }: { searchParams: { id?: string; sid?: string; q?: string; region?: string } }) {
-  const id = searchParams.id ? Number(searchParams.id) : undefined;
-  const sid = searchParams.sid ? Number(searchParams.sid) : 0;
+type SP = Record<string, string | string[] | undefined>;
+
+export default async function Page({
+  // params şu an kullanılmıyor; ESLint susması için _params
+  params: _params,
+  searchParams,
+}: {
+  params?: Promise<{ locale: string }>;
+  searchParams?: Promise<SP>;
+}) {
+  const sp = (await searchParams) ?? {};
+
+  // helper: string | string[] | undefined → string | undefined
+  const pick = (v: string | string[] | undefined) =>
+    Array.isArray(v) ? v[0] : v;
+
+  const idStr = pick(sp.id);
+  const sidStr = pick(sp.sid) ?? "0";
+  const region = pick(sp.region) ?? "eu";
+  const q = pick(sp.q) ?? "";
+
+  const id = idStr ? Number(idStr) : undefined;
+  const sid = Number(sidStr);
+
   return (
     <BdoMarketProfitCalculator
-      initialRegion={searchParams.region ?? "eu"}
-      initialQuery={searchParams.q ?? ""}
-      initialSelection={id !== undefined ? { id, sid } : null}
+      initialRegion={region}
+      initialQuery={q}
+      initialSelection={id !== undefined ? { id, sid: Number.isFinite(sid) ? sid : 0 } : null}
     />
   );
 }
