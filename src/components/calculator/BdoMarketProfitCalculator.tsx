@@ -206,7 +206,7 @@ export default function BdoMarketProfitCalculator({
 
   // === RETURN: Card içine sarıldı ===
   return (
-    <div className="mt-16">
+    <div>
       <InfoCard title="BDO Pazar Gelir Hesaplayıcı" defaultOpen>
         <div className=" w-full  text-neutral-900 dark:text-neutral-50 p-6">
           <div className="max-w-6xl mx-auto grid gap-6">

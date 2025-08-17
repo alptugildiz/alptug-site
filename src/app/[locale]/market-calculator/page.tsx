@@ -42,20 +42,21 @@ export default async function Page({
         className="mt-18 m-auto max-w-7xl px-4 sm:px-6 lg:px-8"
       >
         <div className="px-4">
-          <div className="pt-15">
+          <div className="pt-2">
             <BossNextCard region={region} />
           </div>
-
-          <BdoMarketProfitCalculator
-            initialRegion={region}
-            initialQuery={q}
-            initialSelection={
-              id !== undefined
-                ? { id, sid: Number.isFinite(sid) ? sid : 0 }
-                : null
-            }
-          />
-          <div className="mt-6">
+          <div className="mt-6 ">
+            <BdoMarketProfitCalculator
+              initialRegion={region}
+              initialQuery={q}
+              initialSelection={
+                id !== undefined
+                  ? { id, sid: Number.isFinite(sid) ? sid : 0 }
+                  : null
+              }
+            />
+          </div>
+          <div className="my-6">
             <CronCostCard />
           </div>
         </div>
