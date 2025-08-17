@@ -88,6 +88,10 @@ const DATA: Row[] = [
     values: { BASE: 25, PRI: 80, DUO: 275, TRI: 1100, TET: 2200 },
   },
   {
+    name: "Blackstar Subweapon",
+    values: { BASE: null, PRI: null, DUO: 100, TRI: 591, TET: 3670 },
+  },
+  {
     name: "Deboreka",
     values: { BASE: 95, PRI: 288, DUO: 865, TRI: 2405, TET: 11548 },
   },
