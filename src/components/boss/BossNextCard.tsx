@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect, useState } from "react";
 
@@ -14,7 +13,7 @@ function InfoCard({
 }) {
   return (
     <details
-      className="bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-2xl shadow dark:text-amber-50"
+      className="bg-white/30 dark:bg-white/10 backdrop-blur-md rounded-2xl shadow text-neutral-900 dark:text-neutral-50"
       open={defaultOpen}
     >
       <summary className="list-none select-none cursor-pointer px-4 py-3 flex items-center justify-between">
@@ -28,39 +27,231 @@ function InfoCard({
   );
 }
 
-// ======= API tipleri
-interface BossGroup {
-  bosses: string[];
-  seconds: number | null;
-  eta: number | null;
-  label?: string | null;
-}
-interface BossSchedule {
-  previous?: { bosses: string[]; sinceSeconds: number | null } | null;
-  next?: BossGroup | null;
-  followedBy?: BossGroup | null;
-}
+// =====================================
+// API YOK — Yerel JSON takvime göre hesaplar
+// Tablo: (gün -> "HH:MM" -> aynı slottaki boss listesi)
+// Kaynak: paylaştığın 24H EU takvim görseli
+export type WeeklySchedule = Record<string, Record<string, string[]>>;
 
-// Legacy payload (eski sürüm uyumluluğu)
-interface BossApiResponseLegacy {
-  region: string;
-  bosses: string[];
-  spawnText: string | null;
-  spawnsIn: string | null;
-  spawnsInSeconds?: number | null;
-  nextAt?: number | null;
-}
+const EU_SCHEDULE: WeeklySchedule = {
+  monday: {
+    "00:15": ["Garmoth"],
+    "01:15": ["Karanda", "Kutum", "Uturi"],
+    "03:00": ["Karanda", "Bulgasal"],
+    "06:00": ["Kzarka"],
+    "10:00": ["Kzarka"],
+    "13:00": ["Offin"],
+    "15:00": ["Garmoth"],
+    "17:00": ["Kutum", "Uturi"],
+    "20:00": ["Nouver", "Golden Pig King", "Bulgasal"],
+    "23:15": ["Kzarka", "Sangoon", "Uturi"],
+  },
+  tuesday: {
+    "00:15": ["Garmoth"],
+    "01:15": ["Karanda", "Golden Pig King"],
+    "03:00": ["Kutum", "Sangoon"],
+    "06:00": ["Kzarka"],
+    "10:00": ["Nouver"],
+    "13:00": ["Kutum"],
+    "15:00": ["Garmoth"],
+    "17:00": ["Nouver", "Golden Pig King"],
+    "20:00": ["Karanda", "Bulgasal", "Uturi"],
+    "23:15": ["Quint", "Muraka", "Golden Pig King", "Sangoon"],
+  },
+  wednesday: {
+    "00:15": ["Garmoth"],
+    "01:15": ["Kzarka", "Kutum", "Bulgasal"],
+    "03:00": ["Karanda", "Golden Pig King"],
+    "06:00": ["Kzarka"],
+    "10:00": ["Karanda"],
+    "13:00": ["Nouver"],
+    "15:00": ["Garmoth"],
+    "17:00": ["Kutum", "Offin", "Bulgasal"],
+    "20:00": ["Vell"],
+    "23:15": ["Karanda", "Kzarka", "Sangoon", "Uturi"],
+  },
+  thursday: {
+    "00:15": ["Garmoth"],
+    "01:15": ["Nouver", "Bulgasal"],
+    "03:00": ["Kutum", "Sangoon"],
+    "06:00": ["Nouver"],
+    "10:00": ["Kutum"],
+    // 13:00 yok (–)
+    "15:00": ["Garmoth"],
+    "17:00": ["Kzarka", "Uturi"],
+    "20:00": ["Kutum", "Sangoon", "Bulgasal"],
+    "23:15": ["Quint", "Muraka", "Golden Pig King", "Uturi"],
+  },
+  friday: {
+    "00:15": ["Garmoth"],
+    "01:15": ["Karanda", "Kzarka", "Sangoon"],
+    "03:00": ["Nouver", "Bulgasal"],
+    "06:00": ["Karanda"],
+    "10:00": ["Kutum"],
+    "13:00": ["Karanda"],
+    "15:00": ["Garmoth"],
+    "17:00": ["Nouver", "Uturi"],
+    "20:00": ["Kzarka", "Golden Pig King"],
+    "23:15": ["Kzarka", "Kutum", "Bulgasal", "Uturi"],
+  },
+  saturday: {
+    "00:15": ["Garmoth"],
+    "01:15": ["Karanda", "Kutum", "Golden Pig King", "Sangoon"],
+    "03:00": ["Offin", "Golden Pig King", "Bulgasal"],
+    "06:00": ["Nouver"],
+    "10:00": ["Kutum"],
+    "13:00": ["Nouver"],
+    "15:00": ["Garmoth"],
+    "17:00": ["Black Shadow", "Uturi", "Golden Pig King"],
+    "20:00": ["Karanda", "Kzarka", "Bulgasal", "Sangoon"],
+  },
+  sunday: {
+    // 00:15 yok
+    "01:15": ["Nouver", "Kutum", "Golden Pig King", "Uturi"],
+    "03:00": ["Kzarka", "Sangoon", "Bulgasal"],
+    "06:00": ["Kutum"],
+    "10:00": ["Nouver"],
+    "13:00": ["Kzarka"],
+    "15:00": ["Garmoth"],
+    "17:00": ["Vell"],
+    // 20:00 yok
+    "20:15": ["Garmoth"],
+    "23:15": ["Kzarka", "Nouver", "Golden Pig King", "Sangoon"],
+  },
+};
 
-function fmtTR(total: number) {
+const REGION_TZ: Record<string, string> = {
+  eu: "Europe/Berlin",
+};
+
+const WEEKDAY_IDX: Record<string, number> = {
+  sunday: 0,
+  monday: 1,
+  tuesday: 2,
+  wednesday: 3,
+  thursday: 4,
+  friday: 5,
+  saturday: 6,
+};
+const WEEK_SEC = 7 * 24 * 3600;
+
+function fmtHMS(total: number | null | undefined) {
+  if (total == null) return "--:--:--";
   const t = Math.max(0, Math.floor(total));
-  const h = Math.floor(t / 3600);
-  const m = Math.floor((t % 3600) / 60);
-  const s = Math.floor(t % 60);
-  const parts: string[] = [];
-  if (h > 0) parts.push(`${h} sa`);
-  if (m > 0) parts.push(`${m} dk`);
-  if (h === 0 && m === 0) parts.push(`${s} sn`);
-  return parts.join(" ");
+  const h = String(Math.floor(t / 3600)).padStart(2, "0");
+  const m = String(Math.floor((t % 3600) / 60)).padStart(2, "0");
+  const s = String(Math.floor(t % 60)).padStart(2, "0");
+  return `${h}:${m}:${s}`;
+}
+
+function labelFor(w: number, hh: number, mm: number) {
+  const name =
+    Object.keys(WEEKDAY_IDX).find((k) => WEEKDAY_IDX[k] === w) || "sunday";
+  const pretty = name.charAt(0).toUpperCase() + name.slice(1);
+  return `${String(hh).padStart(2, "0")}:${String(mm).padStart(
+    2,
+    "0"
+  )} ${pretty}`;
+}
+
+function getNowParts(tz: string) {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    hour12: false,
+    weekday: "long",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  }).formatToParts(now);
+  const hh = Number(parts.find((p) => p.type === "hour")?.value);
+  const mm = Number(parts.find((p) => p.type === "minute")?.value);
+  const ss = Number(parts.find((p) => p.type === "second")?.value);
+  const wdStr = (
+    parts.find((p) => p.type === "weekday")?.value || "Sunday"
+  ).toLowerCase();
+  const w = WEEKDAY_IDX[wdStr];
+  return { hh, mm, ss, w };
+}
+
+function secsUntil(
+  tz: string,
+  targetW: number,
+  hh: number,
+  mm: number,
+  offsetMin = 60
+) {
+  const { hh: H, mm: M, ss: S, w: W } = getNowParts(tz);
+  const TOTAL = 7 * 1440;
+
+  // Şu anı +ofset dakika ileri kaydır
+  let nowMin = (W * 1440 + H * 60 + M + offsetMin) % TOTAL;
+  if (nowMin < 0) nowMin += TOTAL;
+
+  const tgtMin = targetW * 1440 + hh * 60 + mm;
+  let deltaMin = tgtMin - nowMin;
+  if (deltaMin < 0) deltaMin += TOTAL;
+
+  return Math.max(0, deltaMin * 60 - S);
+}
+
+function computeSchedule(region: string) {
+  const tz = REGION_TZ[region] || REGION_TZ.eu;
+  const data = EU_SCHEDULE; // şimdilik sadece EU
+  type Slot = { bosses: string[]; seconds: number; label: string };
+  const slots: Slot[] = [];
+
+  (Object.keys(data) as Array<keyof typeof data>).forEach((day) => {
+    const w = WEEKDAY_IDX[day as string];
+    const entries = data[day as string] || {};
+    Object.entries(entries).forEach(([hhmm, bosses]) => {
+      if (!bosses || bosses.length === 0) return;
+      const [hh, mm] = hhmm.split(":").map(Number);
+      const seconds = secsUntil(tz, w, hh, mm);
+      slots.push({ bosses, seconds, label: labelFor(w, hh, mm) });
+    });
+  });
+
+  if (!slots.length)
+    return { previous: null, next: null, followedBy: null } as const;
+
+  const minNext = Math.min(...slots.map((s) => s.seconds));
+  const nextGroup = {
+    bosses: Array.from(
+      new Set(
+        slots.filter((s) => s.seconds === minNext).flatMap((s) => s.bosses)
+      )
+    ),
+    seconds: minNext,
+    eta: Date.now() + minNext * 1000,
+    label: slots.find((s) => s.seconds === minNext)?.label || null,
+  };
+
+  const later = slots.filter((s) => s.seconds > minNext);
+  const fb = later.length ? Math.min(...later.map((s) => s.seconds)) : null;
+  const followedBy =
+    fb == null
+      ? null
+      : {
+          bosses: Array.from(
+            new Set(
+              slots.filter((s) => s.seconds === fb).flatMap((s) => s.bosses)
+            )
+          ),
+          seconds: fb,
+          eta: Date.now() + fb * 1000,
+          label: slots.find((s) => s.seconds === fb)?.label || null,
+        };
+
+  const sinceList = slots.map((s) => WEEK_SEC - s.seconds);
+  const minSince = Math.min(...sinceList);
+  const prevIdx = sinceList.indexOf(minSince);
+  const prevSlot = slots[prevIdx];
+  const previous = prevSlot
+    ? { bosses: prevSlot.bosses, sinceSeconds: minSince }
+    : null;
+
+  return { previous, next: nextGroup, followedBy } as const;
 }
 
 function useCountdown(targetMs: number | null) {
@@ -80,128 +271,41 @@ function useCountdown(targetMs: number | null) {
 }
 
 export default function BossNextCard({ region }: { region: string }) {
-  const [sched, setSched] = useState<BossSchedule | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const [schedule, setSchedule] = useState(() => computeSchedule(region));
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      setErr(null);
-      const res = await fetch(`/api/boss-next?region=${region}`, {
-        cache: "no-store",
-      });
-      const data: any = await res.json();
-
-      // Yeni: data.schedule varsa onu kullan
-      if (data?.schedule) {
-        setSched(data.schedule as BossSchedule);
-        return;
-      }
-
-      // Eski: groups[]
-      if (Array.isArray(data?.groups) && data.groups.length) {
-        const g = data.groups[0];
-        const next: BossGroup = {
-          bosses: g.bosses || [],
-          seconds: g.seconds ?? null,
-          eta:
-            g.eta ?? (g.seconds != null ? Date.now() + g.seconds * 1000 : null),
-          label: g.label,
-        };
-        setSched({ previous: null, next, followedBy: null });
-        return;
-      }
-
-      // En-Eski: legacy tek kayıt
-      const legacy = data as BossApiResponseLegacy;
-      if (legacy) {
-        let secs = legacy.spawnsInSeconds ?? null;
-        if (secs == null && typeof legacy.spawnsIn === "string") {
-          const p = legacy.spawnsIn.split(":").map(Number);
-          if (p.length === 3) secs = p[0] * 3600 + p[1] * 60 + p[2];
-          else if (p.length === 2) secs = p[0] * 60 + p[1];
-        }
-        const next: BossGroup = {
-          bosses: legacy.bosses || [],
-          seconds: secs,
-          eta:
-            legacy.nextAt ?? (secs != null ? Date.now() + secs * 1000 : null),
-          label: legacy.spawnText ?? null,
-        };
-        setSched({ previous: null, next, followedBy: null });
-        return;
-      }
-
-      setSched(null);
-    } catch (e: any) {
-      setErr(e?.message || "Boss bilgisi alınamadı");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  // periyodik güncelle (etiket/sıralama ötelenir)
   useEffect(() => {
-    load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    setSchedule(computeSchedule(region));
+    const id = setInterval(() => setSchedule(computeSchedule(region)), 60_000);
+    return () => clearInterval(id);
   }, [region]);
 
-  // Sayaçlar (ETA üzerinden, stabil)
-  const nextLeft = useCountdown(sched?.next?.eta ?? null);
+  const nextLeft = useCountdown(schedule.next ? schedule.next.eta : null);
+  const followLeft = useCountdown(
+    schedule.followedBy ? schedule.followedBy.eta : null
+  );
 
-  // Görsel düzen: Previous | Next | Followed by
   return (
     <InfoCard title="Black Desert Online Boss Timer" defaultOpen>
-      {/* Üst başlık ve sağda aksiyonlar */}
-      <div className="flex items-center justify-between mb-3">
-        <div className="text-xs opacity-70 dark:text-amber-50">
-          Server: <span className="font-medium">{region.toUpperCase()}</span>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            className="text-xs px-2 py-1 rounded border hover:bg-white/40 dark:hover:bg-white/10 dark:text-amber-50"
-            onClick={load}
-            disabled={loading}
-          >
-            {loading ? "Yükleniyor…" : "Yenile"}
-          </button>
-          <a
-            href={`https://mmotimer.com/bdo/?server=${region}`.replace(
-              "?server=console_",
-              "?server=ps4-"
-            )}
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-neutral-600 dark:text-neutral-300 hover:underline"
-          >
-            Kaynak
-          </a>
-        </div>
-      </div>
-
-      {err && (
-        <div className="text-sm text-red-600 dark:text-red-400">{err}</div>
-      )}
-
-      {/* 12 kolon: 3 | 6 | 3 */}
       <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
         {/* Previous */}
         <div className="md:col-span-3 rounded-2xl bg-black/5 dark:bg-white/5 p-3">
-          <div className="text-sm dark:text-amber-50 font-semibold mb-2 opacity-80">
+          <div className="text-sm font-semibold mb-2 opacity-80">
             Previous boss
           </div>
           <div className="space-y-2">
-            {(sched?.previous?.bosses?.length
-              ? sched.previous.bosses
+            {(schedule.previous?.bosses?.length
+              ? schedule.previous.bosses
               : ["—"]
             ).map((b, i) => (
               <div
                 key={b + i}
                 className="flex items-center justify-between gap-2"
               >
-                <span className="text-sm dark:text-amber-50">{b}</span>
-                <span className="text-xs opacity-70 dark:text-amber-50">
-                  {sched?.previous?.sinceSeconds != null
-                    ? fmtTR(sched.previous.sinceSeconds)
+                <span className="text-sm">{b}</span>
+                <span className="text-xs opacity-70">
+                  {schedule.previous?.sinceSeconds != null
+                    ? fmtHMS(schedule.previous.sinceSeconds)
                     : "—"}
                 </span>
               </div>
@@ -209,32 +313,59 @@ export default function BossNextCard({ region }: { region: string }) {
           </div>
         </div>
 
-        {/* Next (gruplu) */}
-        <div className="md:col-span-9 rounded-2xl dark:text-amber-50 bg-black/5 dark:bg-white/5 p-3">
+        {/* Next */}
+        <div className="md:col-span-6 rounded-2xl bg-black/5 dark:bg-white/5 p-3">
           <div className="text-sm font-semibold mb-2 opacity-80">Next boss</div>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-            {(sched?.next?.bosses?.length ? sched.next.bosses : ["—"]).map(
+            {(schedule.next?.bosses?.length ? schedule.next.bosses : ["—"]).map(
               (b, i) => (
                 <div
                   key={b + i}
                   className="flex flex-col items-center justify-center rounded-xl bg-white/40 dark:bg-white/10 px-2 py-2 text-center"
                 >
                   <div className="text-sm font-medium">{b}</div>
-                  {sched?.next?.label && (
+                  {schedule.next?.label && (
                     <div className="text-[10px] opacity-70">
-                      {sched.next.label}
+                      {schedule.next.label}
                     </div>
                   )}
                   <div className="text-xs font-semibold mt-1">
                     {nextLeft != null
-                      ? fmtTR(nextLeft)
-                      : sched?.next?.seconds != null
-                      ? fmtTR(sched.next.seconds)
+                      ? fmtHMS(nextLeft)
+                      : schedule.next?.seconds != null
+                      ? fmtHMS(schedule.next.seconds)
                       : "—"}
                   </div>
                 </div>
               )
             )}
+          </div>
+        </div>
+
+        {/* Followed by */}
+        <div className="md:col-span-3 rounded-2xl bg-black/5 dark:bg-white/5 p-3">
+          <div className="text-sm font-semibold mb-2 opacity-80">
+            Followed by
+          </div>
+          <div className="space-y-2">
+            {(schedule.followedBy?.bosses?.length
+              ? schedule.followedBy.bosses
+              : ["—"]
+            ).map((b, i) => (
+              <div
+                key={b + i}
+                className="flex items-center justify-between gap-2"
+              >
+                <span className="text-sm">{b}</span>
+                <span className="text-xs opacity-70">
+                  {followLeft != null
+                    ? fmtHMS(followLeft)
+                    : schedule.followedBy?.seconds != null
+                    ? fmtHMS(schedule.followedBy.seconds)
+                    : "—"}
+                </span>
+              </div>
+            ))}
           </div>
         </div>
       </div>

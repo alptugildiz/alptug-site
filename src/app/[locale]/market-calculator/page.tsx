@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import BackgroundLayer from "@/components/BackgroundLayer";
-import BdoMarketProfitCalculator from "@/components/BdoMarketProfitCalculator";
+import BdoMarketProfitCalculator from "@/components/calculator/BdoMarketProfitCalculator";
 import BossNextCard from "@/components/boss/BossNextCard";
 // 👈 yeni
 import { SectionEnum } from "@/enums/SectionEnum";
+import CronCostCard from "@/components/cron/CronCostCard";
 
 export const metadata = {
   title: "BDO Tools",
@@ -37,11 +38,13 @@ export default async function Page({
     <>
       <BackgroundLayer activeSection={activeSection} />
       <div
-        style={{ position: "relative", zIndex: 1000 }}
-        className="mt-18 m-auto max-w-6xl px-4 sm:px-6 lg:px-8"
+        style={{ position: "relative", zIndex: 40 }}
+        className="mt-18 m-auto max-w-7xl px-4 sm:px-6 lg:px-8"
       >
         <div className="px-4">
-          <BossNextCard region={region} />
+          <div className="pt-15">
+            <BossNextCard region={region} />
+          </div>
 
           <BdoMarketProfitCalculator
             initialRegion={region}
@@ -52,6 +55,9 @@ export default async function Page({
                 : null
             }
           />
+          <div className="mt-6">
+            <CronCostCard />
+          </div>
         </div>
       </div>
     </>
