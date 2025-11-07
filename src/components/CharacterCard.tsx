@@ -28,7 +28,7 @@ export default function CharacterCard() {
     },
     {
       name: "LinkedIn",
-      href: "https://https://www.linkedin.com/in/alptugildiz/i",
+      href: "https://www.linkedin.com/in/alptugildiz/",
       icon: "/icons/linkedin.svg",
     },
     {
