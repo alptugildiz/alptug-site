@@ -1,7 +1,6 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-// @ts-expect-error cunku calisiyor
 import "../globals.css";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -11,7 +10,7 @@ export const metadata = {
   title: "Alptug ILDIZ",
   description: "Software Engineer",
   icons: {
-    icon: "/icons/favicon.ico",
+    icon: "/favicon.ico",
   },
 };
 
