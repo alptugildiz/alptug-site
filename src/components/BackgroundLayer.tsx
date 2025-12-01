@@ -2,7 +2,7 @@
 "use client";
 
 import { SectionEnum } from "@/enums/SectionEnum";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import SunGlow from "./SunGlow";
 
 type Star = {
@@ -12,79 +12,22 @@ type Star = {
 };
 
 type BackgroundLayerProps = {
-  activeSection: SectionEnum;
+  activeSection: SectionEnum | null;
 };
 
-export default function BackgroundLayer({
-  activeSection,
-}: BackgroundLayerProps) {
-  const [mounted, setMounted] = useState(false);
-  const [isDark, setIsDark] = useState(false);
-  const [stars, setStars] = useState<Star[]>([]);
-  const [background, setBackground] = useState("");
-  const [prevBackground, setPrevBackground] = useState("");
-  const [fadeKey, setFadeKey] = useState(0);
-
-  useEffect(() => {
-    setMounted(true);
-
-    const html = document.documentElement;
-    setIsDark(html.classList.contains("dark"));
-
-    const observer = new MutationObserver(() => {
-      setIsDark(html.classList.contains("dark"));
-    });
-    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
-
-    const generated = Array.from({ length: 30 }, () => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 2,
-    }));
-    setStars(generated);
-
-    return () => observer.disconnect();
-  }, []);
-
-  useEffect(() => {
-    let newBackground = "";
-
-    if (isDark) {
-      switch (activeSection) {
-        case SectionEnum.Hero:
-          newBackground =
-            "radial-gradient(circle at 20% 40%, #0c033f, #171226, #000000)";
-
-          break;
-        case SectionEnum.Experience:
-          newBackground =
-            "radial-gradient(circle at 80% 80%, #0c033f, #171226, #000000)";
-          break;
-        default:
-          newBackground = "#000";
-      }
-    } else {
-      switch (activeSection) {
-        case SectionEnum.Hero:
-          newBackground =
-            "radial-gradient(circle at 50% 20%, #f7ead9, #f0dfc9, #f3cc95)";
-          break;
-        case SectionEnum.Experience:
-          newBackground =
-            "radial-gradient(circle at 50% 120%, #f3cc95, #7546c2, #330877)";
-          break;
-        default:
-          newBackground = "#fff";
-      }
-    }
-
-    setPrevBackground(background);
-    setBackground(newBackground);
-    setFadeKey((k) => k + 1);
-  }, [activeSection, isDark]);
-
-  if (!mounted) return null;
-
+const BackgroundLayerContent = memo(function BackgroundLayerContent({
+  isDark,
+  background,
+  prevBackground,
+  fadeKey,
+  stars,
+}: {
+  isDark: boolean;
+  background: string;
+  prevBackground: string;
+  fadeKey: number;
+  stars: Star[];
+}) {
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
       <div
@@ -136,4 +79,94 @@ export default function BackgroundLayer({
         ))}
     </div>
   );
-}
+});
+
+const BackgroundLayer = memo(function BackgroundLayer({
+  activeSection,
+}: BackgroundLayerProps) {
+  const [mounted, setMounted] = useState(false);
+  const [isDark, setIsDark] = useState(false);
+  const [stars, setStars] = useState<Star[]>([]);
+  const [background, setBackground] = useState("");
+  const [prevBackground, setPrevBackground] = useState("");
+  const [fadeKey, setFadeKey] = useState(0);
+
+  useEffect(() => {
+    setMounted(true);
+
+    const html = document.documentElement;
+    setIsDark(html.classList.contains("dark"));
+
+    const observer = new MutationObserver(() => {
+      setIsDark(html.classList.contains("dark"));
+    });
+    observer.observe(html, { attributes: true, attributeFilter: ["class"] });
+
+    const generated = Array.from({ length: 30 }, () => ({
+      top: Math.random() * 100,
+      left: Math.random() * 100,
+      delay: Math.random() * 2,
+    }));
+    setStars(generated);
+
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    let newBackground = "";
+
+    if (isDark) {
+      switch (activeSection) {
+        case SectionEnum.Hero:
+          newBackground =
+            "radial-gradient(circle at 20% 40%, #0c033f, #171226, #000000)";
+          break;
+        case SectionEnum.Experience:
+          newBackground =
+            "radial-gradient(circle at 80% 80%, #0c033f, #171226, #000000)";
+          break;
+        case SectionEnum.Tools:
+          newBackground =
+            "radial-gradient(circle at 50% 50%, #2d1b4e, #1a0f33, #000000)";
+          break;
+        default:
+          newBackground = "#000";
+      }
+    } else {
+      switch (activeSection) {
+        case SectionEnum.Hero:
+          newBackground =
+            "radial-gradient(circle at 50% 20%, #f7ead9, #f0dfc9, #f3cc95)";
+          break;
+        case SectionEnum.Experience:
+          newBackground =
+            "radial-gradient(circle at 50% 120%, #f3cc95, #7546c2, #330877)";
+          break;
+        case SectionEnum.Tools:
+          newBackground =
+            "radial-gradient(circle at 50% 50%, #f5e6d3, #e6d4b5, #d4a574)";
+          break;
+        default:
+          newBackground = "#fff";
+      }
+    }
+
+    setPrevBackground(background);
+    setBackground(newBackground);
+    setFadeKey((k) => k + 1);
+  }, [activeSection, isDark]);
+
+  if (!mounted) return null;
+
+  return (
+    <BackgroundLayerContent
+      isDark={isDark}
+      background={background}
+      prevBackground={prevBackground}
+      fadeKey={fadeKey}
+      stars={stars}
+    />
+  );
+});
+
+export default BackgroundLayer;

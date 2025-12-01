@@ -2,7 +2,7 @@
   "name": "alptugildizpersonal",
   "version": "0.1.0",
   "private": true,
-"type": "module",
+  "type": "module",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "gsap": "^3.13.0",
+    "jsqr": "^1.4.0",
     "next": "15.3.4",
     "next-intl": "^4.1.0",
+    "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-country-flag": "^3.1.0",
     "react-dom": "^19.0.0",

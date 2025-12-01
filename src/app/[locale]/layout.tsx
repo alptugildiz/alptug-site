@@ -1,8 +1,11 @@
 import { NextIntlClientProvider, hasLocale } from "next-intl";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+// @ts-expect-error cunku calisiyor
 import "../globals.css";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import LocaleSwitcher from "@/components/LocalSwitcher";
 
 export const metadata = {
   title: "Alptug ILDIZ",
@@ -30,7 +33,8 @@ export default async function LocaleLayout({
         <NextIntlClientProvider locale={locale}>
           <Header />
           {children}
-        
+          <LocaleSwitcher />
+          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

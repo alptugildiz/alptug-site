@@ -25,7 +25,7 @@ export default function Header() {
   return (
     <header
       style={{ backgroundColor }}
-      className="fixed top-0 left-0 w-full z-50 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.1)] flex items-center p-4 sm:px-8"
+      className="fixed top-0 left-0 w-full z-50 backdrop-blur-md shadow-[0_4px_16px_rgba(0,0,0,0.1)] flex items-center justify-between p-4 sm:px-8"
     >
       <div className="flex items-center">
         <Link href="/" prefetch={false} className="inline-flex items-center">
@@ -41,13 +41,21 @@ export default function Header() {
       </div>
 
       <div
-        className="flex-1 flex justify-center gap-4"
+        className="absolute left-1/2 transform -translate-x-1/2 text-sm"
         style={{ color: isDark ? "#fff" : "#000" }}
       >
-        <div>{t("greeting")}</div>
+        {t("greeting")}
       </div>
 
-      <div className="ml-auto">
+      <div className="flex items-center gap-6">
+        <Link
+          href="/tools"
+          prefetch={false}
+          className="text-sm hover:opacity-70 transition-opacity"
+          style={{ color: isDark ? "#fff" : "#000" }}
+        >
+          {t("tools")}
+        </Link>
         <ThemeToggle />
       </div>
     </header>

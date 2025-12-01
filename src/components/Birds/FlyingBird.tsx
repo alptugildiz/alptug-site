@@ -17,7 +17,6 @@ export default function FlyingBird({
 }) {
   const src = ducks[Math.floor(Math.random() * ducks.length)];
   const isReverse = src.includes("duck3");
-  console.log("girdiii");
 
   return (
     <div

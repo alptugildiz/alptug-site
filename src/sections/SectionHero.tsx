@@ -17,7 +17,6 @@ export default function SectionHero({ onEnterSection }: SectionHeroProps) {
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
-          console.log("girdi hero");
           onEnterSection(SectionEnum.Hero);
         }
       },

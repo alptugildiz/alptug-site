@@ -4,7 +4,8 @@
     "description": "Merhaba! Ben Alptuğ, modern web teknolojileriyle kullanıcı dostu, etkileşimli ve estetik arayüzler geliştiren bir yazılım mühendisiyim. Ağırlıklı olarak React, Next.js ve TypeScript ile çalışıyor, ihtiyaç duyulduğunda Vue.js, PHP ve SQL gibi teknolojilerde de yetkin çözümler sunuyorum. Performansa, sadeliğe ve güçlü bir kullanıcı deneyimine odaklanan yazılımlar geliştirmekten keyif alıyorum."
   },
   "header": {
-    "greeting": "selam!"
+    "greeting": "selam!",
+    "tools": "Araçlar"
   },
   "experience": {
     "title": "Tecrübelerim",
@@ -34,5 +35,70 @@
         "description": "React, Next.js ve TypeScript kullanarak çeşitli web projelerinde kullanıcı odaklı arayüzler geliştirdim. Performans ve erişilebilirlik odaklı çözümler sundum."
       }
     ]
+  },
+  "tools": {
+    "title": "Araçlar",
+    "description": "Günlük görevlerinize yardımcı olacak faydalı web araçlarının bir koleksiyonu.",
+    "openButton": "Aracı Aç",
+    "backButton": "← Araçlara Dön",
+    "notFound": "Araç bulunamadı",
+    "items": [
+      {
+        "id": "qr-reader",
+        "name": "QR Kod Okuyucu",
+        "description": "QR kodları tarayın ve çözün"
+      },
+      {
+        "id": "json-formatter",
+        "name": "JSON Formatlayıcı",
+        "description": "JSON'ı biçimlendirin ve doğrulayın"
+      },
+      {
+        "id": "qr-generator",
+        "name": "QR Kod Oluşturucu",
+        "description": "Metinden QR kod oluşturun"
+      }
+    ],
+    "jsonFormatter": {
+      "inputPlaceholder": "JSON'ı buraya yapıştırın...",
+      "formatButton": "Biçimlendir",
+      "validateButton": "Doğrula",
+      "copyButton": "Kopyala",
+      "downloadButton": "İndir",
+      "clearButton": "Temizle",
+      "validJSON": "Geçerli JSON",
+      "invalidJSON": "Geçersiz JSON",
+      "noInput": "Lütfen JSON girin",
+      "inputLabel": "Giriş",
+      "outputLabel": "Çıkış",
+      "outputPlaceholder": "Biçimlendirilmiş JSON burada görünecek...",
+      "infoFormat": "Biçimlendir: JSON'ınızı güzel biçimlendir",
+      "infoValidate": "Doğrula: JSON'ınızın geçerli olup olmadığını kontrol et",
+      "infoCopy": "Kopyala: Biçimlendirilmiş JSON'ı panoya kopyala",
+      "infoDownload": "İndir: JSON'ı dosya olarak indir",
+      "infoClear": "Temizle: Tüm girişleri ve çıkışları temizle"
+    },
+    "qrReader": {
+      "openCamera": "Kamerayi Aç",
+      "takePicture": "Resim Çek",
+      "selectImage": "Resim Seç",
+      "stopScanning": "Taramayı Durdur",
+      "cameraAccessDenied": "Kamera erişimi reddedildi. Lütfen izin verin.",
+      "fileUploadError": "Dosya yükleme hatası",
+      "noQRFound": "QR kod bulunamadı",
+      "imageProcessError": "Görüntü işlenirken hata oluştu",
+      "results": "Sonuçlar",
+      "copy": "Kopyala",
+      "cameraError": "Kamera erişimi hatası"
+    },
+    "qrGenerator": {
+      "inputPlaceholder": "Metin veya URL girin...",
+      "generateButton": "Oluştur",
+      "downloadButton": "İndir",
+      "copyButton": "Kopyala",
+      "clearButton": "Temizle",
+      "noInput": "Lütfen metin girin",
+      "generatingError": "QR kod oluşturulurken hata"
+    }
   }
 }

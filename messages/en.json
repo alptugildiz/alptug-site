@@ -3,8 +3,9 @@
     "name": "Alptuğ ILDIZ",
     "description": "Hi! I'm Alptuğ, a software engineer passionate about creating user-friendly, interactive, and visually appealing interfaces using modern web technologies. I mainly work with React, Next.js, and TypeScript, and also provide effective solutions using technologies like Vue.js, PHP, and SQL when needed. I enjoy building software focused on performance, simplicity, and a great user experience."
   },
-   "header": {
-    "greeting": "hiii!"
+  "header": {
+    "greeting": "hiii!",
+    "tools": "Tools"
   },
   "experience": {
     "title": "Experience",
@@ -34,5 +35,70 @@
         "description": "Developed user-focused interfaces in various web projects using React, Next.js, and TypeScript. Delivered solutions with an emphasis on performance and accessibility."
       }
     ]
+  },
+  "tools": {
+    "title": "Tools",
+    "description": "A collection of useful web tools to help you with your daily tasks.",
+    "openButton": "Open Tool",
+    "backButton": "← Back to Tools",
+    "notFound": "Tool not found",
+    "items": [
+      {
+        "id": "qr-reader",
+        "name": "QR Code Reader",
+        "description": "Scan and decode QR codes"
+      },
+      {
+        "id": "json-formatter",
+        "name": "JSON Formatter",
+        "description": "Format and validate JSON"
+      },
+      {
+        "id": "qr-generator",
+        "name": "QR Code Generator",
+        "description": "Generate QR codes from text"
+      }
+    ],
+    "jsonFormatter": {
+      "inputPlaceholder": "Paste your JSON here...",
+      "formatButton": "Format",
+      "validateButton": "Validate",
+      "copyButton": "Copy",
+      "downloadButton": "Download",
+      "clearButton": "Clear",
+      "validJSON": "Valid JSON",
+      "invalidJSON": "Invalid JSON",
+      "noInput": "Please enter JSON",
+      "inputLabel": "Input",
+      "outputLabel": "Output",
+      "outputPlaceholder": "Formatted JSON will appear here...",
+      "infoFormat": "Format: Pretty print your JSON",
+      "infoValidate": "Validate: Check if your JSON is valid",
+      "infoCopy": "Copy: Copy formatted JSON to clipboard",
+      "infoDownload": "Download: Download JSON as a file",
+      "infoClear": "Clear: Clear all inputs and outputs"
+    },
+    "qrReader": {
+      "openCamera": "Open Camera",
+      "takePicture": "Take Picture",
+      "selectImage": "Select Image",
+      "stopScanning": "Stop Scanning",
+      "cameraAccessDenied": "Camera access denied. Please grant permission.",
+      "fileUploadError": "File upload error",
+      "noQRFound": "QR code not found",
+      "imageProcessError": "Error processing image",
+      "results": "Results",
+      "copy": "Copy",
+      "cameraError": "Camera access error"
+    },
+    "qrGenerator": {
+      "inputPlaceholder": "Enter text or URL...",
+      "generateButton": "Generate",
+      "downloadButton": "Download",
+      "copyButton": "Copy",
+      "clearButton": "Clear",
+      "noInput": "Please enter text",
+      "generatingError": "Error generating QR code"
+    }
   }
 }
