@@ -270,8 +270,58 @@ function useCountdown(targetMs: number | null) {
   return left;
 }
 
+// Telegram'a bildirim gönder (gece 1-10 arası göndermez)
+async function sendTelegramNotification(bossNames: string[], timeLeft: number) {
+  const token = process.env.NEXT_PUBLIC_TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.NEXT_PUBLIC_TELEGRAM_CHAT_ID;
+
+  if (!token || !chatId) {
+    console.log("Telegram credentials not configured");
+    return;
+  }
+
+  // Saat kontrolü - gece 1:00 ile 10:00 arasında bildirim gönderme
+  const now = new Date();
+  const hour = now.getHours();
+  if (hour >= 1 && hour < 10) {
+    console.log("Notification suppressed: quiet hours (01:00-10:00)");
+    return;
+  }
+
+  const bossKey = bossNames.sort().join(",");
+  const notifKey = `telegram-boss-${bossKey}`;
+  const lastNotified = localStorage.getItem(notifKey);
+  const lastCheck = Date.now();
+
+  // Aynı boss için 30 saniye içinde tekrar gönderme
+  if (lastNotified && lastCheck - parseInt(lastNotified) < 30000) {
+    return;
+  }
+
+  localStorage.setItem(notifKey, lastCheck.toString());
+
+  const message = `🎯 *BDO Boss Spawning Soon!*\n\n${bossNames.join(
+    ", "
+  )}\n⏰ *Kalış süresi:* ${fmtHMS(timeLeft)}`;
+
+  try {
+    await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: message,
+        parse_mode: "Markdown",
+      }),
+    });
+  } catch (error) {
+    console.error("Telegram notification error:", error);
+  }
+}
+
 export default function BossNextCard({ region }: { region: string }) {
   const [schedule, setSchedule] = useState(() => computeSchedule(region));
+  const [notificationSent, setNotificationSent] = React.useState(false);
 
   // periyodik güncelle (etiket/sıralama ötelenir)
   useEffect(() => {
@@ -284,6 +334,22 @@ export default function BossNextCard({ region }: { region: string }) {
   const followLeft = useCountdown(
     schedule.followedBy ? schedule.followedBy.eta : null
   );
+
+  // 10 dakika (600 saniye) kaldığında Telegram bildirimi gönder
+  useEffect(() => {
+    if (
+      nextLeft != null &&
+      nextLeft <= 600 &&
+      nextLeft > 595 &&
+      schedule.next?.bosses &&
+      !notificationSent
+    ) {
+      sendTelegramNotification(schedule.next.bosses, nextLeft);
+      setNotificationSent(true);
+    } else if (nextLeft == null || nextLeft > 600) {
+      setNotificationSent(false);
+    }
+  }, [nextLeft, schedule.next, notificationSent]);
 
   return (
     <InfoCard title="Black Desert Online Boss Timer" defaultOpen>
