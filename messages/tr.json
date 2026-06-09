@@ -8,31 +8,31 @@
     "tools": "Araçlar"
   },
   "experience": {
-    "title": "Tecrübelerim",
+    "title": "KARİYER_LOGU",
     "items": [
       {
-        "title": "Frontend Developer",
+        "title": "Frontend Engineer",
         "company": "Odeon Software & Technology",
-        "period": "Mar 2023 - Günümüz",
-        "description": "React.js ve Next.js kullanarak modern, performans odaklı web arayüzleri geliştirdim. Uzak ekiplerle iş birliği içinde çevik metodolojilerle çalıştım."
+        "period": "Mar 2023 – Günümüz",
+        "description": "React.js ve Next.js ile yüksek performanslı arayüzler inşa ediyorum. Dağıtık agile takimlerde production-grade UI sistemleri geliştirip kullanıcıya ulaştırıyorum — sıfır kesinti, maksimum etki."
       },
       {
         "title": "Software Developer",
         "company": "BadiWorks",
-        "period": "Nis 2022 - Nis 2023",
-        "description": "JavaScript ve PHP kullanarak kurumsal projelerde hem frontend hem backend geliştirmeleri yaptım. Kullanıcı deneyimini önceliklendiren çözümler ürettim."
+        "period": "Nis 2022 – Nis 2023",
+        "description": "JavaScript ve PHP ile kurumsal ölçekli projelerde full-stack geliştirme yaptım. Backend mantığı ile piksel-mükemmel arayüzler arasındaki köprüyü kurdum — UX'i her katmanda önceliklendirerek."
       },
       {
         "title": "Software Engineer",
         "company": "Teklas",
-        "period": "Ağu 2020 - Ara 2021",
-        "description": "Fabrika içi dijitalleşme süreçlerinde kullanılan yazılımların geliştirilmesinde görev aldım. JavaScript ile üretim takibi uygulamaları geliştirdim."
+        "period": "Ağu 2020 – Ara 2021",
+        "description": "JavaScript tabanlı gerçek zamanlı üretim takip sistemleri geliştirerek fabrika operasyonlarını dijitalleştirdim. Analog süreçleri veri odaklı panolara dönüştürdüm."
       },
       {
-        "title": "Frontend Geliştirici",
-        "company": "Freelance",
-        "period": "2022 - Günümüz",
-        "description": "React, Next.js ve TypeScript kullanarak çeşitli web projelerinde kullanıcı odaklı arayüzler geliştirdim. Performans ve erişilebilirlik odaklı çözümler sundum."
+        "title": "Freelance Frontend Developer",
+        "company": "Bağımsız",
+        "period": "2022 – Günümüz",
+        "description": "Farklı müşteriler için özel web deneyimleri geliştiriyorum. React, Next.js, TypeScript — hızlı, erişilebilir ve uzun soluklu."
       }
     ]
   },

@@ -3,13 +3,7 @@
 
 import { SectionEnum } from "@/enums/SectionEnum";
 import { useEffect, useState, memo } from "react";
-import SunGlow from "./SunGlow";
-
-type Star = {
-  top: number;
-  left: number;
-  delay: number;
-};
+import PixelSprites from "./PixelSprites";
 
 type BackgroundLayerProps = {
   activeSection: SectionEnum | null;
@@ -20,63 +14,49 @@ const BackgroundLayerContent = memo(function BackgroundLayerContent({
   background,
   prevBackground,
   fadeKey,
-  stars,
 }: {
   isDark: boolean;
   background: string;
   prevBackground: string;
   fadeKey: number;
-  stars: Star[];
 }) {
+  const neonColor = isDark ? "#00ffff" : "#e040fb";
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
-      <div
-        className="absolute inset-0"
-        style={{ background: prevBackground }}
-      />
+      {/* base bg */}
+      <div className="absolute inset-0" style={{ background: prevBackground }} />
       <div
         key={fadeKey}
         className="absolute inset-0 transition-opacity duration-1000 opacity-0 animate-fadeIn"
         style={{ background }}
       />
+
+      {/* dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.04] mix-blend-overlay pointer-events-none"
-        aria-hidden="true"
+        className="absolute inset-0 opacity-30"
         style={{
-          position: "fixed",
-          pointerEvents: "none",
-          top: 0,
-          left: 0,
-          width: "100vw",
-          height: "100vh",
-          opacity: 1,
-          backgroundRepeat: "repeat",
-          backgroundPosition: "top left",
-          backgroundImage: "url('/images/bg-axtra.png')",
+          backgroundImage: isDark
+            ? "radial-gradient(circle, rgba(0,255,255,0.3) 1px, transparent 1px)"
+            : "radial-gradient(circle, rgba(224,64,251,0.3) 1px, transparent 1px)",
+          backgroundSize: "28px 28px",
         }}
       />
 
-      {!isDark && <SunGlow />}
-      {isDark &&
-        stars.map((star, i) => (
-          <div
-            key={i}
-            className="absolute"
-            style={{
-              top: `${star.top}%`,
-              left: `${star.left}%`,
-              opacity: 0,
-              animation: `starfall ${6 + Math.random() * 10}s linear ${
-                star.delay
-              }s infinite forwards`,
-            }}
-          >
-            <div className="relative w-2 h-2">
-              <div className="absolute left-1/2 top-0 -translate-x-1/2 w-[1px] h-2 bg-white rounded-full drop-shadow-sm" />
-              <div className="absolute top-1/2 left-0 -translate-y-1/2 h-[1px] w-2 bg-white rounded-full drop-shadow-sm" />
-            </div>
-          </div>
-        ))}
+      {/* flying pixel sprites */}
+      <PixelSprites neonColor={neonColor} />
+
+      {/* CRT scanlines */}
+      <div className="absolute inset-0 crt-scanlines opacity-60" />
+
+      {/* subtle vignette */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(ellipse at center, transparent 50%, rgba(0,0,0,0.55) 100%)",
+        }}
+      />
     </div>
   );
 });
@@ -86,14 +66,12 @@ const BackgroundLayer = memo(function BackgroundLayer({
 }: BackgroundLayerProps) {
   const [mounted, setMounted] = useState(false);
   const [isDark, setIsDark] = useState(false);
-  const [stars, setStars] = useState<Star[]>([]);
   const [background, setBackground] = useState("");
   const [prevBackground, setPrevBackground] = useState("");
   const [fadeKey, setFadeKey] = useState(0);
 
   useEffect(() => {
     setMounted(true);
-
     const html = document.documentElement;
     setIsDark(html.classList.contains("dark"));
 
@@ -101,14 +79,6 @@ const BackgroundLayer = memo(function BackgroundLayer({
       setIsDark(html.classList.contains("dark"));
     });
     observer.observe(html, { attributes: true, attributeFilter: ["class"] });
-
-    const generated = Array.from({ length: 30 }, () => ({
-      top: Math.random() * 100,
-      left: Math.random() * 100,
-      delay: Math.random() * 2,
-    }));
-    setStars(generated);
-
     return () => observer.disconnect();
   }, []);
 
@@ -116,38 +86,28 @@ const BackgroundLayer = memo(function BackgroundLayer({
     let newBackground = "";
 
     if (isDark) {
+      // CRT Terminal — dark navy, not pure black
       switch (activeSection) {
         case SectionEnum.Hero:
-          newBackground =
-            "radial-gradient(circle at 20% 40%, #0c033f, #171226, #000000)";
+          newBackground = "radial-gradient(ellipse at 30% 30%, #0d1f2d 0%, #071018 70%)";
           break;
         case SectionEnum.Experience:
-          newBackground =
-            "radial-gradient(circle at 80% 80%, #0c033f, #171226, #000000)";
-          break;
-        case SectionEnum.Tools:
-          newBackground =
-            "radial-gradient(circle at 50% 50%, #2d1b4e, #1a0f33, #000000)";
+          newBackground = "radial-gradient(ellipse at 70% 70%, #0d1f2d 0%, #071018 70%)";
           break;
         default:
-          newBackground = "#000";
+          newBackground = "#071018";
       }
     } else {
+      // Synthwave — dark purple with magenta tint shift
       switch (activeSection) {
         case SectionEnum.Hero:
-          newBackground =
-            "radial-gradient(circle at 50% 20%, #f7ead9, #f0dfc9, #f3cc95)";
+          newBackground = "radial-gradient(ellipse at 30% 30%, #1a0030 0%, #0d001a 70%)";
           break;
         case SectionEnum.Experience:
-          newBackground =
-            "radial-gradient(circle at 50% 120%, #f3cc95, #7546c2, #330877)";
-          break;
-        case SectionEnum.Tools:
-          newBackground =
-            "radial-gradient(circle at 50% 50%, #f5e6d3, #e6d4b5, #d4a574)";
+          newBackground = "radial-gradient(ellipse at 70% 70%, #200040 0%, #0d001a 70%)";
           break;
         default:
-          newBackground = "#fff";
+          newBackground = "#0d001a";
       }
     }
 
@@ -164,7 +124,6 @@ const BackgroundLayer = memo(function BackgroundLayer({
       background={background}
       prevBackground={prevBackground}
       fadeKey={fadeKey}
-      stars={stars}
     />
   );
 });

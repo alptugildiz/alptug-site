@@ -8,31 +8,31 @@
     "tools": "Tools"
   },
   "experience": {
-    "title": "Experience",
+    "title": "CAREER_LOG",
     "items": [
       {
-        "title": "Frontend Developer",
+        "title": "Frontend Engineer",
         "company": "Odeon Software & Technology",
         "period": "Mar 2023 – Present",
-        "description": "Developed modern, performance-focused web interfaces using React.js and Next.js. Worked in agile methodologies collaborating with remote teams."
+        "description": "Architecting high-performance web interfaces with React.js and Next.js. Shipping production-grade UI systems within distributed agile teams — zero downtime, maximum impact."
       },
       {
         "title": "Software Developer",
         "company": "BadiWorks",
         "period": "Apr 2022 – Apr 2023",
-        "description": "Contributed to enterprise-level projects with JavaScript and PHP, developing both frontend and backend components. Focused on delivering user-centric solutions."
+        "description": "Delivered enterprise-scale features across the full stack with JavaScript and PHP. Bridged backend logic and pixel-perfect frontends — obsessing over UX at every layer."
       },
       {
         "title": "Software Engineer",
         "company": "Teklas",
         "period": "Aug 2020 – Dec 2021",
-        "description": "Worked on the development of internal software for factory digitization processes. Built production tracking tools using JavaScript."
+        "description": "Digitized factory-floor operations by engineering real-time production tracking systems in JavaScript. Turned analog workflows into data-driven dashboards."
       },
       {
-        "title": "Frontend Developer",
-        "company": "Freelance",
+        "title": "Freelance Frontend Developer",
+        "company": "Independent",
         "period": "2022 – Present",
-        "description": "Developed user-focused interfaces in various web projects using React, Next.js, and TypeScript. Delivered solutions with an emphasis on performance and accessibility."
+        "description": "Crafting custom web experiences for clients worldwide. React, Next.js, TypeScript — fast, accessible, and built to last."
       }
     ]
   },

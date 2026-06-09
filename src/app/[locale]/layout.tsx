@@ -3,14 +3,21 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import "@/app/globals.css";
 import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import LocaleSwitcher from "@/components/LocalSwitcher";
+import PixelCursor from "@/components/PixelCursor";
+import { Press_Start_2P } from "next/font/google";
+
+const pressStart = Press_Start_2P({
+  weight: "400",
+  subsets: ["latin"],
+  variable: "--font-arcade",
+  display: "swap",
+});
 
 export const metadata = {
   title: "Alptug ILDIZ",
   description: "Software Engineer",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/icons/ailogo.png",
   },
 };
 
@@ -27,13 +34,12 @@ export default async function LocaleLayout({
   }
 
   return (
-    <html lang={locale} className={"font-clash"} suppressHydrationWarning>
+    <html lang={locale} className={pressStart.variable} suppressHydrationWarning>
       <body className="min-h-screen font-sans">
         <NextIntlClientProvider locale={locale}>
+          <PixelCursor />
           <Header />
           {children}
-          <LocaleSwitcher />
-          <Footer />
         </NextIntlClientProvider>
       </body>
     </html>

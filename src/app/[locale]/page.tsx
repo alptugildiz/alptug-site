@@ -34,7 +34,7 @@ export default function HomePage() {
     <>
       <BackgroundLayer activeSection={activeSectionMemo} />
 
-      <main className="h-screen w-screen overflow-y-scroll transition-colors pt-20 pb-20">
+      <main className="h-screen w-screen overflow-y-scroll transition-colors pt-20">
         <div className="space-y-16">
           <SectionHero onEnterSection={setActiveSection} />
           <SectionExperience onEnterSection={setActiveSection} />

@@ -3,41 +3,33 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useRef } from "react";
-
 import { SectionEnum } from "@/enums/SectionEnum";
-import BirdSet from "@/components/Birds/BirdSet";
 import { useIsDark } from "@/app/hooks/useIsDark";
-import PlaneSet from "@/components/Planes/PlaneSet";
 
 type SectionExperienceProps = {
   onEnterSection: (section: SectionEnum) => void;
 };
 
-export default function SectionExperience({
-  onEnterSection,
-}: SectionExperienceProps) {
+export default function SectionExperience({ onEnterSection }: SectionExperienceProps) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const t = useTranslations("experience");
-
   const isDark = useIsDark();
+
+  const neonColor     = isDark ? "#00ffff" : "#e040fb";
+  const neonDim       = isDark ? "rgba(0,255,255,0.15)" : "rgba(224,64,251,0.15)";
+  const neonDimBorder = isDark ? "rgba(0,255,255,0.2)"  : "rgba(224,64,251,0.2)";
+  const neonHover     = isDark ? "rgba(0,255,255,0.35)" : "rgba(224,64,251,0.35)";
+
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          onEnterSection(SectionEnum.Experience);
-        }
+        if (entry.isIntersecting) onEnterSection(SectionEnum.Experience);
       },
-      {
-        threshold: 0.5,
-      }
+      { threshold: 0.5 }
     );
-
     const el = sectionRef.current;
     if (el) observer.observe(el);
-
-    return () => {
-      if (el) observer.unobserve(el);
-    };
+    return () => { if (el) observer.unobserve(el); };
   }, [onEnterSection]);
 
   const items = t.raw("items") as {
@@ -53,29 +45,61 @@ export default function SectionExperience({
       id={SectionEnum.Experience}
       className="relative z-20 min-h-screen w-full flex items-start justify-center px-4 sm:px-8"
     >
-      {!isDark ? <BirdSet /> : <PlaneSet />}
+      <div className="max-w-4xl w-full space-y-8 text-center pb-10 md:pb-10 md:pt-40 relative">
 
-      <div className="experience-content max-w-4xl w-full space-y-8 text-center relative overflow-hidden rounded-xl pb-10 md:pb-10 md:pt-60 ">
-        <h2 className="text-3xl sm:text-4xl font-bold text-black dark:text-white relative z-10">
+        {/* section label */}
+        <div
+          className="text-[8px] font-arcade mb-4"
+          style={{ color: isDark ? "rgba(0,255,255,0.5)" : "rgba(224,64,251,0.5)" }}
+        >
+          &gt; LOADING EXPERIENCE.DAT...
+        </div>
+
+        <h2
+          className="text-xl sm:text-2xl font-arcade"
+          style={{
+            color: neonColor,
+            textShadow: isDark
+              ? "0 0 10px rgba(0,255,255,0.7), 0 0 30px rgba(0,255,255,0.3)"
+              : "0 0 10px rgba(224,64,251,0.7), 0 0 30px rgba(224,64,251,0.3)",
+          }}
+        >
           {t("title")}
         </h2>
 
-        <ul className="space-y-6 relative z-20  px-0.5 md:py-4">
+        <ul className="space-y-4 relative z-20 px-0.5">
           {items.map((item, index) => (
             <li
               key={index}
-              className="bg-white/10 hover:bg-white/20  dark:bg-white/5 p-6 rounded-xl shadow-md hover:shadow-lg  ring-1 ring-white/10 text-left backdrop-blur-xs transition-colors duration-400"
-              // style={{
-              //   boxShadow: "10px 0px 20px rgba(255, 255, 255, 0.109) inset",
-              // }}
+              className="group border bg-black/80 p-6 text-left transition-all duration-300 relative"
+              style={{ borderColor: neonDimBorder }}
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = neonColor;
+                (e.currentTarget as HTMLElement).style.boxShadow = `0 0 15px ${neonHover}`;
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLElement).style.borderColor = neonDimBorder;
+                (e.currentTarget as HTMLElement).style.boxShadow = "none";
+              }}
             >
-              <h3 className="font-medium text-xl text-black dark:text-white">
+              {/* index badge */}
+              <span
+                className="absolute top-3 right-4 text-[10px] font-mono tracking-widest"
+                style={{ color: neonDim }}
+              >
+                [{String(index + 1).padStart(2, "0")}]
+              </span>
+
+              <h3
+                className="font-arcade text-xs sm:text-sm leading-relaxed"
+                style={{ color: neonColor }}
+              >
                 {item.title}
               </h3>
-              <p className="text-sm text-zinc-700 dark:text-zinc-400">
-                {item.company} ・ {item.period}
+              <p className="text-sm font-mono mt-1" style={{ color: isDark ? "rgba(0,255,255,0.5)" : "rgba(224,64,251,0.5)" }}>
+                {item.company} &nbsp;/&nbsp; {item.period}
               </p>
-              <p className="mt-2 text-zinc-800 dark:text-zinc-300">
+              <p className="mt-3 text-gray-400 text-sm leading-relaxed">
                 {item.description}
               </p>
             </li>
