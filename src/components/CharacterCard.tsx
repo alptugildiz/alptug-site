@@ -60,14 +60,14 @@ export default function CharacterCard() {
           className="flex items-center justify-center p-4 md:p-6 border-b md:border-b-0 md:border-r"
           style={{ borderColor: dimColor }}
         >
-          <div className="relative" style={{ width: 280, height: 280 }}>
+          <div className="relative w-[160px] h-[160px] md:w-[240px] md:h-[240px]">
             {/* main */}
             <Image
               src="/me_transparent.png"
               alt="Character"
               width={280}
               height={280}
-              className="relative z-10 animate-glitch-char-main object-contain"
+              className="relative z-10 animate-glitch-char-main object-contain w-full h-full"
               style={{
                 imageRendering: "pixelated",
                 filter: `drop-shadow(0 0 8px ${neonColor}66)`,
@@ -79,7 +79,7 @@ export default function CharacterCard() {
               src="/me_transparent.png"
               alt="" aria-hidden
               width={280} height={280}
-              className="absolute inset-0 object-contain animate-glitch-char-r"
+              className="absolute inset-0 object-contain w-full h-full animate-glitch-char-r"
               style={{
                 imageRendering: "pixelated",
                 filter: "brightness(3) sepia(1) saturate(500%) hue-rotate(300deg)",
@@ -90,7 +90,7 @@ export default function CharacterCard() {
               src="/me_transparent.png"
               alt="" aria-hidden
               width={280} height={280}
-              className="absolute inset-0 object-contain animate-glitch-char-g"
+              className="absolute inset-0 object-contain w-full h-full animate-glitch-char-g"
               style={{
                 imageRendering: "pixelated",
                 filter: "brightness(3) sepia(1) saturate(500%) hue-rotate(100deg)",
@@ -101,7 +101,7 @@ export default function CharacterCard() {
               src="/me_transparent.png"
               alt="" aria-hidden
               width={280} height={280}
-              className="absolute inset-0 object-contain animate-glitch-char-b"
+              className="absolute inset-0 object-contain w-full h-full animate-glitch-char-b"
               style={{
                 imageRendering: "pixelated",
                 filter: "brightness(3) sepia(1) saturate(500%) hue-rotate(200deg)",
