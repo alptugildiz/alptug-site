@@ -143,7 +143,7 @@ export default function CharacterCard() {
           </p>
 
           {/* socials */}
-          <div className="flex gap-3">
+          <div className="flex gap-3 justify-center md:justify-start">
             {socials.map(({ name, href, icon }) => (
               <a
                 key={name}
