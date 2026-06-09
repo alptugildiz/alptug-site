@@ -26,7 +26,7 @@ export default function LocaleSwitcher() {
   );
 
   return (
-    <div className="flex gap-2 fixed z-50" style={{ bottom: 20, left: 20 }}>
+    <div className="flex gap-2">
       {locales.map(({ code }) => (
         <button
           key={code}

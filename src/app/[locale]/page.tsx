@@ -6,7 +6,6 @@ import SectionExperience from "@/sections/SectionExperience";
 import BackgroundLayer from "@/components/BackgroundLayer";
 import { SectionEnum } from "@/enums/SectionEnum";
 import Footer from "@/components/Footer";
-import LocaleSwitcher from "@/components/LocalSwitcher";
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -38,9 +37,6 @@ export default function HomePage() {
         <div className="space-y-16">
           <SectionHero onEnterSection={setActiveSection} />
           <SectionExperience onEnterSection={setActiveSection} />
-        </div>
-        <div className="relative bg-transparent w-20 -bottom-10 left-4 z-50">
-          <LocaleSwitcher />
         </div>
         <Footer />
       </main>

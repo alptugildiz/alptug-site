@@ -29,7 +29,7 @@ export default function SectionHero({ onEnterSection }: SectionHeroProps) {
       id={SectionEnum.Hero}
       className="relative min-h-screen w-full flex items-center justify-center overflow-hidden"
     >
-      <div className="card z-10 px-4 w-full -translate-y-10 md:-translate-y-20">
+      <div className="card z-10 px-4 w-full pt-6 md:pt-0 md:-translate-y-10">
         <CharacterCard />
       </div>
     </section>
