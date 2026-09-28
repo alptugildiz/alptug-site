@@ -10,46 +10,80 @@ permissions:
 
 concurrency:
   group: deploy
-  cancel-in-progress: true
+  # a running deploy is never cancelled mid-way; newer pushes queue behind it
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
 
 jobs:
   check:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
           node-version: 22
           cache: npm
       - run: npm ci --no-audit --no-fund
       - run: npm run lint
+      # route types (LayoutProps, PageProps...) are generated, not committed
+      - run: npx next typegen
       - run: npx tsc --noEmit
-      - run: npm run build
+
+  # the image is built here, not on the VPS, so deploys don't eat the server's CPU budget
+  build:
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: NEXT_PUBLIC_BUILD_SHA=${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   deploy:
-    needs: check
+    needs: build
     # skipped until the CapRover secrets exist; set repo variable CAPROVER_ENABLED=true to turn it on
     if: vars.CAPROVER_ENABLED == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment: production
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Stamp build SHA
-        run: echo "NEXT_PUBLIC_BUILD_SHA=${GITHUB_SHA}" > .env.production
-      - name: Pack source
-        run: tar --exclude=.git --exclude=node_modules -cf /tmp/deploy.tar .
-      - name: Deploy to CapRover
+      - name: Deploy image to CapRover
         env:
           CAPROVER_URL: ${{ secrets.CAPROVER_URL }}
           CAPROVER_APP: ${{ secrets.CAPROVER_APP }}
           CAPROVER_APP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN }}
         run: |
-          npx --yes caprover@2 deploy \
+          npx --yes caprover@2.4.4 deploy \
             --caproverUrl "$CAPROVER_URL" \
             --appName "$CAPROVER_APP" \
-            --appToken "$CAPROVER_APP_TOKEN" \
-            --tarFile /tmp/deploy.tar
+            --imageName "${IMAGE}:sha-${GITHUB_SHA}"

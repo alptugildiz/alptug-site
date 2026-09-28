@@ -8,6 +8,9 @@ RUN npm ci --no-audit --no-fund
 FROM node:22-alpine AS build
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+# inlined into the client bundle at build time (shown in the footer)
+ARG NEXT_PUBLIC_BUILD_SHA=dev
+ENV NEXT_PUBLIC_BUILD_SHA=$NEXT_PUBLIC_BUILD_SHA
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
