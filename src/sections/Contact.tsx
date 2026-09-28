@@ -45,7 +45,7 @@ export default function Contact() {
               {profile.email}
               <span className="mt-3 block h-px origin-left scale-x-25 bg-cream transition-transform duration-500 group-hover:scale-x-100" />
             </a>
-            <IstanbulMap className="max-w-[520px]" />
+            <IstanbulMap className="max-w-[720px]" />
           </div>
 
           <ul className="divide-y divide-line">

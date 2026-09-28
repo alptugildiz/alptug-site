@@ -8,6 +8,10 @@ const Z = 11;
 const ORIGIN_PX = { x: 1186 * 256, y: 764 * 256 + 132 };
 const CELL_PX = 12;
 
+// Visible band of the bitmap: trims open Black Sea at the top and the Tuzla tip at the bottom.
+const ROW_START = 16;
+const ROWS = 80;
+
 function cellToLatLon(cx: number, cy: number) {
   const n = 256 * 2 ** Z;
   const px = ORIGIN_PX.x + cx * CELL_PX;
@@ -47,7 +51,7 @@ export default function IstanbulMap({ className = "" }: { className?: string }) 
     const draw = () => {
       const { width: w, height: h } = canvas;
       const cw = w / MAP_COLS;
-      const ch = h / MAP_ROWS;
+      const ch = h / ROWS;
       ctx.clearRect(0, 0, w, h);
       ctx.fillStyle = "#fff8df";
       for (const cls of [0, 1, 2]) {
@@ -56,8 +60,10 @@ export default function IstanbulMap({ className = "" }: { className?: string }) 
         ctx.beginPath();
         for (let i = 0; i < data.length; i++) {
           if (data[i] !== cls) continue;
+          const row = (i / MAP_COLS) | 0;
+          if (row < ROW_START || row >= ROW_START + ROWS) continue;
           const x = (i % MAP_COLS) + 0.5;
-          const y = ((i / MAP_COLS) | 0) + 0.5;
+          const y = row - ROW_START + 0.5;
           ctx.moveTo(x * cw + r * cw, y * ch);
           ctx.arc(x * cw, y * ch, r * cw, 0, Math.PI * 2);
         }
@@ -86,11 +92,11 @@ export default function IstanbulMap({ className = "" }: { className?: string }) 
     const onMove = (e: PointerEvent) => {
       const r = canvas.getBoundingClientRect();
       const x = Math.floor(((e.clientX - r.left) / r.width) * MAP_COLS);
-      const y = Math.floor(((e.clientY - r.top) / r.height) * MAP_ROWS);
+      const y = Math.floor(((e.clientY - r.top) / r.height) * ROWS);
       if (hover && hover.x === x && hover.y === y) return;
       hover = { x, y };
-      const { lat, lon } = cellToLatLon(x + 0.5, y + 0.5);
-      const kind = ["water", "green", "urban"][data[y * MAP_COLS + x]] ?? "";
+      const { lat, lon } = cellToLatLon(x + 0.5, y + ROW_START + 0.5);
+      const kind = ["water", "green", "urban"][data[(y + ROW_START) * MAP_COLS + x]] ?? "";
       setReadout(`${lat.toFixed(4)}°N ${lon.toFixed(4)}°E · ${kind}`);
       draw();
     };
@@ -116,7 +122,7 @@ export default function IstanbulMap({ className = "" }: { className?: string }) 
       <canvas
         ref={canvasRef}
         className="block w-full cursor-crosshair"
-        style={{ aspectRatio: `${MAP_COLS} / ${MAP_ROWS}` }}
+        style={{ aspectRatio: `${MAP_COLS} / ${ROWS}` }}
         role="img"
         aria-label="Dot map of Istanbul: the Bosphorus, Golden Horn, Princes' Islands and the Marmara coast"
       />
