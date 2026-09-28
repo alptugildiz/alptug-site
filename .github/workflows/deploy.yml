@@ -1,0 +1,55 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run lint
+      - run: npx tsc --noEmit
+      - run: npm run build
+
+  deploy:
+    needs: check
+    # skipped until the CapRover secrets exist; set repo variable CAPROVER_ENABLED=true to turn it on
+    if: vars.CAPROVER_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Stamp build SHA
+        run: echo "NEXT_PUBLIC_BUILD_SHA=${GITHUB_SHA}" > .env.production
+      - name: Pack source
+        run: tar --exclude=.git --exclude=node_modules -cf /tmp/deploy.tar .
+      - name: Deploy to CapRover
+        env:
+          CAPROVER_URL: ${{ secrets.CAPROVER_URL }}
+          CAPROVER_APP: ${{ secrets.CAPROVER_APP }}
+          CAPROVER_APP_TOKEN: ${{ secrets.CAPROVER_APP_TOKEN }}
+        run: |
+          npx --yes caprover@2 deploy \
+            --caproverUrl "$CAPROVER_URL" \
+            --appName "$CAPROVER_APP" \
+            --appToken "$CAPROVER_APP_TOKEN" \
+            --tarFile /tmp/deploy.tar
