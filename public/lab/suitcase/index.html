@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Bavul Prototipi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=DM+Sans:wght@400;600&family=VT323&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="/lab/suitcase/assets/index-QXAI-WRw.js"></script>
+    <link rel="stylesheet" crossorigin href="/lab/suitcase/assets/index-qHGfGyhy.css">
+  </head>
+  <body>
+    <canvas id="stars" aria-hidden="true"></canvas>
+    <canvas id="scene" aria-hidden="true"></canvas>
+
+    <header class="top">
+      <strong>deneme 21</strong>
+      <span>bavul + sticker prototipi</span>
+    </header>
+
+    <p class="hint">Sürükle: döndür · Bavula tıkla: aç/kapat · Sticker'a tıkla: proje</p>
+
+    <div class="controls">
+      <button id="toggleLid" type="button">Kapağı aç</button>
+      <button id="replay" type="button">Baştan oynat</button>
+      <button id="openCms" type="button" class="primary">+ Proje ekle</button>
+    </div>
+
+    <div class="looks" role="group" aria-label="Görünüm">
+      <button type="button" data-look="base">Base</button>
+      <button type="button" data-look="film">Film</button>
+      <button type="button" data-look="vhs">VHS</button>
+      <button type="button" data-look="tv">TV</button>
+      <button type="button" data-look="pixel">Pixel</button>
+    </div>
+
+    <div id="tooltip" class="tooltip" hidden></div>
+
+    <aside id="panel" class="panel" hidden>
+      <button class="close" type="button" aria-label="Kapat">×</button>
+      <span class="swatch"></span>
+      <h2></h2>
+      <p class="year"></p>
+      <p class="desc"></p>
+      <a class="link" href="#">Projeye git →</a>
+    </aside>
+
+    <form id="cms" class="cms" hidden>
+      <h2>CMS simülasyonu</h2>
+      <p class="sub">Normalde bu veri Sanity/Strapi gibi bir CMS'ten gelir.</p>
+      <label>Proje adı <input name="name" required maxlength="14" value="Yeni" /></label>
+      <label>Yıl <input name="year" type="number" value="2026" /></label>
+      <label>Açıklama <input name="description" value="CMS'ten yeni eklendi." /></label>
+      <div class="row">
+        <label>Renk <input name="color" type="color" value="#ff6f59" /></label>
+        <label>Şekil
+          <select name="shape">
+            <option value="circle">Yuvarlak</option>
+            <option value="pill">Hap</option>
+            <option value="badge">Rozet</option>
+            <option value="rect">Etiket</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <button type="button" class="cancel">Vazgeç</button>
+        <button type="submit" class="primary">Ekle ve yapıştır</button>
+      </div>
+    </form>
+
+    <main id="detail" class="detail" hidden>
+      <button class="back" type="button">← Tüm projeler</button>
+      <p class="eyebrow"></p>
+      <h1></h1>
+      <p class="lead"></p>
+      <dl class="meta">
+        <div><dt>Rol</dt><dd>Frontend, arayüz tasarımı</dd></div>
+        <div><dt>Stack</dt><dd>Next.js, Three.js, Sanity</dd></div>
+        <div><dt>Süre</dt><dd>3 ay</dd></div>
+      </dl>
+      <div class="shot shot-wide"><span>Görsel alanı</span></div>
+      <p class="body-text">Bu alan CMS'ten gelen proje içeriğiyle dolacak: problem, süreç, kararlar ve sonuç. Şimdilik yer tutucu metin.</p>
+      <div class="shots">
+        <div class="shot"><span>Görsel</span></div>
+        <div class="shot"><span>Görsel</span></div>
+      </div>
+      <a class="next" href="#">Sonraki proje <span></span> →</a>
+    </main>
+
+    <nav class="sr-only" aria-label="Projeler"><ul id="projectList"></ul></nav>
+
+  </body>
+</html>

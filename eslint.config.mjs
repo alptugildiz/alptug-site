@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // TEMP lab: prebuilt static prototype (see README "Temporary lab pages")
+    "public/lab/**",
   ]),
 ]);
 

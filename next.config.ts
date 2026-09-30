@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   output: "standalone",
   poweredByHeader: false,
   reactStrictMode: true,
+  // TEMP lab: /lab/suitcase serves the static prototype in public/lab/suitcase (see README "Temporary lab pages")
+  async rewrites() {
+    return [{ source: "/lab/suitcase", destination: "/lab/suitcase/index.html" }];
+  },
   async headers() {
     return [
       {

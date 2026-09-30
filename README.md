@@ -22,6 +22,22 @@ npm run lint && npx tsc --noEmit && npm run build
 
 Motion respects `prefers-reduced-motion` (boot skipped, grain off, shader renders one still frame).
 
+## Temporary lab pages
+
+`/lab/suitcase` is a temporary, unlinked demo: the "deneme 21" Three.js suitcase + sticker prototype, prebuilt as static files. It is not part of the Next app (no React, no three.js dependency here) and carries `noindex, nofollow`.
+
+- **Source:** `../deneme 21` (Vite). Rebuild into this repo with `npm run build:site` there.
+- **Files here:** `public/lab/suitcase/**` (build output), one rewrite in `next.config.ts`, one ignore in `eslint.config.mjs`. All three are marked `TEMP lab`.
+
+**To remove it:**
+
+1. Delete `public/lab/suitcase/` (and `public/lab/` if empty).
+2. Remove the `rewrites()` block marked `TEMP lab` from `next.config.ts`.
+3. Remove the `public/lab/**` line marked `TEMP lab` from `eslint.config.mjs`.
+4. Delete this section.
+
+Check nothing is left with `git grep -n "TEMP lab"`.
+
 ## Deploy
 
 Self-hosted on a VPS with CapRover behind Cloudflare. See [DEPLOY.md](./DEPLOY.md).
