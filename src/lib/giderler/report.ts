@@ -107,3 +107,6 @@ export function compareMonths(expenses: Expense[], range: Range, person: Person,
 
   return { months, rows, totals: withChanges(months.map((m) => m.total)) };
 }
+
+export const reportHref = (range: Range, person: Person) =>
+  `/giderler/rapor?${new URLSearchParams({ bas: range.start, bit: range.end, kisi: person })}`;
