@@ -20,11 +20,14 @@ WORKDIR /app
 ENV NODE_ENV=production \
     NEXT_TELEMETRY_DISABLED=1 \
     PORT=3000 \
-    HOSTNAME=0.0.0.0
+    HOSTNAME=0.0.0.0 \
+    GIDER_DATA_DIR=/app/data
 RUN addgroup -S nodejs -g 1001 && adduser -S nextjs -u 1001 -G nodejs
 COPY --from=build --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=build --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=build --chown=nextjs:nodejs /app/public ./public
+# /giderler JSON store; a fresh volume mounted here inherits this ownership (see DEPLOY.md)
+RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
 USER nextjs
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=10s \

@@ -6,7 +6,7 @@ CapRover paneli: `https://captain.5.10.220.30.nip.io` (root domain `5.10.220.30.
 
 ## 1. CapRover'da uygulama
 
-1. CapRover paneli → **Apps** → `alptug-site` adında app oluştur (Persistent Data gerekmez).
+1. CapRover paneli → **Apps** → `alptug-site` adında app oluştur (Persistent Data gerekmez; `/giderler` verisi için volume, 5. bölümdeki override ile bağlanır).
 2. App → **HTTP Settings** → *Container HTTP Port* = `3000`.
 3. **Connect New Domain**: `alptugildiz.com` ve `www.alptugildiz.com`.
 4. App → **Deployment** → *Method 1: Official CLI* bölümünden **App Token** üret (CI bunu kullanacak).
@@ -96,7 +96,47 @@ sudo ufw status
 
 > Tünel dışında SSH erişimini kaybetmemek için VPS sağlayıcının web konsolunu (VNC/serial) yedek giriş yolu olarak hazır tut.
 
-## 5. Doğrulama
+## 5. Giderler sayfası (`/giderler`)
+
+Şifreli gider tablosu. Veri, konteynerde `/app/data/expenses.json` dosyasında durur (`GIDER_DATA_DIR`, Dockerfile'da ayarlı). Uygulama "Persistent Data" olmadan oluşturulduğu için volume, **Service Update Override** ile bağlanır. Bu ayar her deploy'da yeniden uygulanır.
+
+1. CapRover → app → **App Configs** → en altta **Service Update Override**:
+
+   ```yaml
+   TaskTemplate:
+     ContainerSpec:
+       Mounts:
+         - Type: volume
+           Source: alptug-site-data
+           Target: /app/data
+   ```
+
+   Volume ilk bağlandığında, imajdaki `/app/data` klasörünün `nextjs` sahipliğini alır.
+
+2. Şifre hash'lerini üret (her kişi için ayrı):
+
+   ```bash
+   node scripts/gider-hash.mjs '<şifre>'
+   # → scrypt:<salt>:<hash>
+   ```
+
+3. CapRover → app → **App Configs** → **Environmental Variables**:
+
+   | Değişken | Değer |
+   | --- | --- |
+   | `GIDER_ALPTUG_PASSWORD_HASH` | 2. adımın çıktısı |
+   | `GIDER_GAMZE_PASSWORD_HASH` | 2. adımın çıktısı |
+   | `GIDER_SESSION_SECRET` | en az 32 karakter rastgele: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+
+   Secret değişirse herkesin oturumu kapanır. Şifre değiştirmek için hash'i yenile, kaydet.
+
+4. **Kalıcılık testi:** giriş yap, bir test kaydı gir, CapRover'da *Save & Restart* yap (ya da yeni bir deploy bekle). Kayıt duruyorsa volume çalışıyor. Sonra test kaydını sil.
+
+Yedek: sayfadaki **JSON indir** butonu tüm kayıtları indirir.
+
+Yerelde: `.env.local`'e aynı üç değişkeni koy; veri proje kökündeki `data/` klasörüne yazılır (gitignore'da).
+
+## 6. Doğrulama
 
 ```bash
 curl -sI https://alptugildiz.com | grep -iE "^(HTTP|cf-ray|server)"   # 200 + cf-ray
