@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import type { UserId } from "@/lib/giderler/categories.ts";
 import { getUser } from "@/lib/giderler/session.ts";
 import { getStore } from "@/lib/giderler/store.ts";
@@ -37,6 +38,9 @@ export default async function GiderlerPage({ searchParams }: PageProps<"/giderle
         <h1 className="hud-label text-xl text-cream">Giderler</h1>
         <div className="flex flex-wrap items-center gap-3">
           <MonthPicker months={availableMonths(expenses, new Date(), month)} value={month} />
+          <Link href="/giderler/rapor" className={button}>
+            Rapor
+          </Link>
           <a href="/giderler/export" className={button} download>
             JSON indir
           </a>

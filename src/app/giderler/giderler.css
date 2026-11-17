@@ -61,3 +61,66 @@
     display: none;
   }
 }
+
+/* ─── print / "Save as PDF" ──────────────────────────── */
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+    background-image: none !important;
+    color: #111 !important;
+  }
+  .scanlines,
+  .grain {
+    display: none !important;
+  }
+
+  /* the HUD's dark panels and cream text become ink on paper */
+  .report,
+  .report * {
+    color: #111 !important;
+    border-color: #d4d4d4 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  .report .panel {
+    background: #fff !important;
+    padding: 0 0 12px !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+  .report .change {
+    color: #555 !important;
+  }
+
+  /* keep the chart and bars printing in colour */
+  .report .bar-alptug,
+  .report .bar-gamze,
+  .report .bar-total,
+  .report .track {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .report .bar-alptug {
+    background: #6f9a00 !important;
+  }
+  .report .bar-gamze,
+  .report .bar-total {
+    background: #9a9486 !important;
+  }
+  .report .track {
+    background: #ececec !important;
+  }
+
+  .report .avoid-break,
+  .report tr {
+    break-inside: avoid;
+  }
+  .report .overflow-x-auto {
+    overflow: visible !important;
+  }
+}

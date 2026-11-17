@@ -5,7 +5,7 @@ import { calendarDays, shiftMonth } from "@/lib/giderler/calendar.ts";
 import { today } from "@/lib/giderler/summary.ts";
 import { field, label as labelClass } from "./ui";
 
-type Props = { id: string; name: string; label: string; defaultValue: string };
+type Props = { id: string; name: string; label: string; defaultValue: string; onChange?: (iso: string) => void };
 
 const fmt = (opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("tr-TR", { ...opts, timeZone: "UTC" });
 const longDate = fmt({ day: "numeric", month: "long", year: "numeric" });
@@ -21,7 +21,7 @@ function shiftDay(iso: string, delta: number): string {
 }
 
 /** Date field with a calendar popover in the site's style; submits YYYY-MM-DD through a hidden input. */
-export default function DatePicker({ id, name, label, defaultValue }: Props) {
+export default function DatePicker({ id, name, label, defaultValue, onChange }: Props) {
   const initial = /^\d{4}-\d{2}-\d{2}$/.test(defaultValue) && !Number.isNaN(asDate(defaultValue).getTime()) ? defaultValue : today();
   const [value, setValue] = useState(initial);
   const [open, setOpen] = useState(false);
@@ -56,6 +56,7 @@ export default function DatePicker({ id, name, label, defaultValue }: Props) {
   const pick = (iso: string) => {
     setValue(iso);
     close();
+    onChange?.(iso);
   };
 
   const onGridKey = (e: KeyboardEvent) => {
