@@ -111,30 +111,24 @@ sudo ufw status
            Target: /app/data
    ```
 
-   Volume ilk bağlandığında, imajdaki `/app/data` klasörünün `nextjs` sahipliğini alır.
+   Volume ilk bağlandığında, imajdaki `/app/data` klasörünün `nextjs` sahipliğini alır. Volume, `/app/data`'yı içermeyen eski bir imajla oluşturulduysa root'a ait kalabilir; kayıt eklerken hata alınırsa `Source`'u yeni bir isimle değiştir (ör. `alptug-site-data2`) ve kaydet. Bunu yeni imaj deploy edildikten **sonra** yap.
 
-2. Şifre hash'lerini üret (her kişi için ayrı):
-
-   ```bash
-   node scripts/gider-hash.mjs '<şifre>'
-   # → scrypt:<salt>:<hash>
-   ```
-
-3. CapRover → app → **App Configs** → **Environmental Variables**:
+2. CapRover → app → **App Configs** → **Environmental Variables**:
 
    | Değişken | Değer |
    | --- | --- |
-   | `GIDER_ALPTUG_PASSWORD_HASH` | 2. adımın çıktısı |
-   | `GIDER_GAMZE_PASSWORD_HASH` | 2. adımın çıktısı |
-   | `GIDER_SESSION_SECRET` | en az 32 karakter rastgele: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+   | `GIDER_ALPTUG_PASSWORD` | Alptuğ'un şifresi |
+   | `GIDER_GAMZE_PASSWORD` | Gamze'nin şifresi |
 
-   Secret değişirse herkesin oturumu kapanır. Şifre değiştirmek için hash'i yenile, kaydet.
+   Şifreler sunucu env'inde düz metin durur (panel erişimi zaten sunucuya tam erişim demek); başka yerde kullanılan bir şifre koyma. Oturum cookie'sinin imza anahtarı iki şifreden türetilir, bu yüzden şifrelerden biri değişince herkesin oturumu kapanır. İkisinden biri eksikse sayfa "Sunucu yapılandırılmamış" der.
 
-4. **Kalıcılık testi:** giriş yap, bir test kaydı gir, CapRover'da *Save & Restart* yap (ya da yeni bir deploy bekle). Kayıt duruyorsa volume çalışıyor. Sonra test kaydını sil.
+3. **Kalıcılık testi:** giriş yap, bir test kaydı gir, CapRover'da *Save & Restart* yap (ya da yeni bir deploy bekle). Kayıt duruyorsa volume çalışıyor. Sonra test kaydını sil.
+
+Arama motorları: `/giderler` altındaki her yanıt `X-Robots-Tag: noindex, nofollow` başlığıyla döner (`next.config.ts`), sayfada da aynı meta etiketi var. `robots.txt`'ye bilerek eklenmedi: orada engellenen bir sayfayı Google tarayamaz, `noindex`'i göremez ve adres de herkese ilan edilmiş olur.
 
 Yedek: sayfadaki **JSON indir** butonu tüm kayıtları indirir.
 
-Yerelde: `.env.local`'e aynı üç değişkeni koy; veri proje kökündeki `data/` klasörüne yazılır (gitignore'da).
+Yerelde: `.env.local`'e aynı iki değişkeni koy; veri proje kökündeki `data/` klasörüne yazılır (gitignore'da).
 
 ## 6. Doğrulama
 

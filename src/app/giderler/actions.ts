@@ -5,7 +5,14 @@ import { revalidatePath } from "next/cache";
 import { attemptLogin } from "@/lib/giderler/auth.ts";
 import { isCategory, isUser } from "@/lib/giderler/categories.ts";
 import { parseAmount } from "@/lib/giderler/money.ts";
-import { endSession, getUser, loginLimiter, sessionSecret, startSession } from "@/lib/giderler/session.ts";
+import {
+  configuredPasswords,
+  endSession,
+  getUser,
+  loginLimiter,
+  sessionSecret,
+  startSession,
+} from "@/lib/giderler/session.ts";
 import { getStore, type ExpenseInput } from "@/lib/giderler/store.ts";
 
 /** `values` echoes the submission on error so the form can refill what React's reset cleared. */
@@ -17,11 +24,7 @@ export async function login(_prev: FormState, formData: FormData): Promise<FormS
   if (!sessionSecret()) return { error: "Sunucu yapılandırılmamış." };
 
   const user = formData.get("user");
-  const hashes = {
-    alptug: process.env.GIDER_ALPTUG_PASSWORD_HASH,
-    gamze: process.env.GIDER_GAMZE_PASSWORD_HASH,
-  };
-  const result = attemptLogin(user, String(formData.get("password") ?? ""), hashes, loginLimiter);
+  const result = attemptLogin(user, String(formData.get("password") ?? ""), configuredPasswords(), loginLimiter);
 
   if (result === "limited") return { error: "Çok fazla deneme. 15 dakika sonra tekrar dene." };
   if (result === "invalid" || !isUser(user)) return { error: "Kullanıcı adı veya şifre hatalı." };

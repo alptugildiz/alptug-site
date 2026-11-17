@@ -19,6 +19,11 @@ const nextConfig: NextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      {
+        // private expense tracker: never indexed; kept out of robots.txt so crawlers can see this and the path isn't advertised
+        source: "/giderler/:path*",
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      },
     ];
   },
 };

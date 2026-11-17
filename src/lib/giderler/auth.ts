@@ -1,27 +1,24 @@
-import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 import { isUser, type UserId } from "./categories.ts";
-
-// keep in sync with scripts/gider-hash.mjs
-const SALT_BYTES = 16;
-const KEY_BYTES = 64;
 
 export const SESSION_MAX_AGE_S = 60 * 60 * 24 * 30;
 
-/** → "scrypt:<saltHex>:<hashHex>" (no "$", which .env files would expand), the format stored in GIDER_*_PASSWORD_HASH. */
-export function hashPassword(password: string): string {
-  const salt = randomBytes(SALT_BYTES);
-  const hash = scryptSync(password, salt, KEY_BYTES);
-  return `scrypt:${salt.toString("hex")}:${hash.toString("hex")}`;
+export type Passwords = Record<UserId, string | undefined>;
+
+const digest = (s: string) => createHash("sha256").update(s).digest();
+
+/** Plain passwords live in server env (GIDER_*_PASSWORD); comparing digests keeps it constant-time. */
+export function checkPassword(input: string, expected: string | undefined): boolean {
+  if (!expected) return false;
+  return timingSafeEqual(digest(input), digest(expected));
 }
 
-export function verifyPassword(password: string, stored: string | undefined): boolean {
-  const [scheme, saltHex, hashHex] = stored?.split(":") ?? [];
-  if (scheme !== "scrypt" || !saltHex || !hashHex) return false;
-
-  const expected = Buffer.from(hashHex, "hex");
-  if (expected.length !== KEY_BYTES) return false;
-  const actual = scryptSync(password, Buffer.from(saltHex, "hex"), KEY_BYTES);
-  return timingSafeEqual(actual, expected);
+/** Cookie signing key derived from both passwords, so changing either one logs everyone out. */
+export function deriveSessionSecret(passwords: Passwords): string | undefined {
+  if (!passwords.alptug || !passwords.gamze) return undefined;
+  return createHmac("sha256", "giderler-session-v1")
+    .update(JSON.stringify([passwords.alptug, passwords.gamze]))
+    .digest("hex");
 }
 
 function sign(payload: string, secret: string): Buffer {
@@ -77,18 +74,18 @@ export type LoginLimiter = ReturnType<typeof createLoginLimiter>;
 
 /**
  * Keyed by user, not by IP: X-Forwarded-For is client-controlled, and with only two accounts
- * the limiter map stays bounded and scrypt never runs for made-up user names.
+ * the limiter map stays bounded and made-up user names never reach the password check.
  */
 export function attemptLogin(
   user: unknown,
   password: string,
-  hashes: Record<UserId, string | undefined>,
+  passwords: Passwords,
   limiter: LoginLimiter,
   now = Date.now(),
 ): "ok" | "invalid" | "limited" {
   if (!isUser(user)) return "invalid";
   if (!limiter.check(user, now)) return "limited";
-  if (!verifyPassword(password, hashes[user])) {
+  if (!checkPassword(password, passwords[user])) {
     limiter.fail(user, now);
     return "invalid";
   }

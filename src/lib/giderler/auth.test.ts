@@ -1,32 +1,50 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { createHmac } from "node:crypto";
 import {
   attemptLogin,
+  checkPassword,
   createLoginLimiter,
-  hashPassword,
+  deriveSessionSecret,
   SESSION_MAX_AGE_S,
   signSession,
-  verifyPassword,
   verifySession,
 } from "./auth.ts";
 
 const SECRET = "test-secret-that-is-long-enough-1234";
 
-test("verifyPassword accepts the right password and rejects the wrong one", () => {
-  const stored = hashPassword("gizli");
-  assert.equal(verifyPassword("gizli", stored), true);
-  assert.equal(verifyPassword("gizl", stored), false);
+test("checkPassword accepts the exact password and rejects anything else", () => {
+  assert.equal(checkPassword("gizli", "gizli"), true);
+  assert.equal(checkPassword("gizl", "gizli"), false);
+  assert.equal(checkPassword("gizli ", "gizli"), false);
+  assert.equal(checkPassword("Gizli", "gizli"), false);
 });
 
-test("verifyPassword is false for missing or malformed hashes", () => {
-  for (const stored of [undefined, "", "garbage", "scrypt:zz:zz", "scrypt:abcd", "scrypt$ab$cd"]) {
-    assert.equal(verifyPassword("gizli", stored), false, String(stored));
-  }
+test("checkPassword is false when no password is configured", () => {
+  assert.equal(checkPassword("", undefined), false);
+  assert.equal(checkPassword("", ""), false);
+  assert.equal(checkPassword("x", undefined), false);
 });
 
-test("hashPassword salts every hash", () => {
-  assert.notEqual(hashPassword("x"), hashPassword("x"));
+test("deriveSessionSecret needs both passwords", () => {
+  assert.equal(deriveSessionSecret({ alptug: "a", gamze: undefined }), undefined);
+  assert.equal(deriveSessionSecret({ alptug: "", gamze: "g" }), undefined);
+});
+
+test("deriveSessionSecret is stable for the same passwords and changes when one changes", () => {
+  const a = deriveSessionSecret({ alptug: "a-pass", gamze: "g-pass" });
+  assert.ok(a && a.length >= 32);
+  assert.equal(deriveSessionSecret({ alptug: "a-pass", gamze: "g-pass" }), a);
+  assert.notEqual(deriveSessionSecret({ alptug: "a-pass2", gamze: "g-pass" }), a);
+  // swapping or re-splitting the two passwords must not collide
+  assert.notEqual(deriveSessionSecret({ alptug: "g-pass", gamze: "a-pass" }), a);
+  assert.notEqual(deriveSessionSecret({ alptug: "a-passg", gamze: "-pass" }), a);
+});
+
+test("a password change logs existing sessions out", () => {
+  const before = deriveSessionSecret({ alptug: "a-pass", gamze: "g-pass" });
+  const after = deriveSessionSecret({ alptug: "new", gamze: "g-pass" });
+  assert.equal(verifySession(signSession("gamze", before!), after), null);
 });
 
 test("verifySession round-trips a signed session", () => {
@@ -51,8 +69,7 @@ test("verifySession rejects expired sessions", () => {
   assert.equal(verifySession(token, SECRET, now + 31 * 24 * 3600 * 1000), null);
 });
 
-test("verifySession rejects a validly signed payload for an unknown user", async () => {
-  const { createHmac } = await import("node:crypto");
+test("verifySession rejects a validly signed payload for an unknown user", () => {
   const payload = Buffer.from(JSON.stringify({ u: "admin", exp: Date.now() + 60_000 })).toString("base64url");
   const sig = createHmac("sha256", SECRET).update(payload).digest("base64url");
   assert.equal(verifySession(`${payload}.${sig}`, SECRET), null);
@@ -74,35 +91,29 @@ test("login limiter blocks after 5 failures until the window passes or reset", (
   assert.equal(limiter.check("k", t0), true);
 });
 
-test("scripts/gider-hash.mjs prints a hash verifyPassword accepts", () => {
-  const out = execFileSync(process.execPath, ["scripts/gider-hash.mjs", "deneme"], { encoding: "utf8" }).trim();
-  assert.match(out, /^scrypt:[0-9a-f]+:[0-9a-f]+$/);
-  assert.equal(verifyPassword("deneme", out), true);
-});
-
-test("hashes contain no $ so .env files don't expand them", () => {
-  assert.equal(hashPassword("x").includes("$"), false);
-});
-
-const hashes = { alptug: hashPassword("a-pass"), gamze: hashPassword("g-pass") };
+const passwords = { alptug: "a-pass", gamze: "g-pass" };
 
 test("attemptLogin accepts the right user and password", () => {
-  assert.equal(attemptLogin("alptug", "a-pass", hashes, createLoginLimiter()), "ok");
+  assert.equal(attemptLogin("alptug", "a-pass", passwords, createLoginLimiter()), "ok");
+});
+
+test("attemptLogin rejects another user's password", () => {
+  assert.equal(attemptLogin("alptug", "g-pass", passwords, createLoginLimiter()), "invalid");
 });
 
 test("attemptLogin rate-limits per user, so nothing the client sends gets around it", () => {
   const limiter = createLoginLimiter();
-  for (let i = 0; i < 5; i++) assert.equal(attemptLogin("alptug", "guess", hashes, limiter), "invalid");
-  assert.equal(attemptLogin("alptug", "a-pass", hashes, limiter), "limited");
-  assert.equal(attemptLogin("gamze", "g-pass", hashes, limiter), "ok");
+  for (let i = 0; i < 5; i++) assert.equal(attemptLogin("alptug", "guess", passwords, limiter), "invalid");
+  assert.equal(attemptLogin("alptug", "a-pass", passwords, limiter), "limited");
+  assert.equal(attemptLogin("gamze", "g-pass", passwords, limiter), "ok");
 });
 
 test("attemptLogin rejects unknown users without counting them against anyone", () => {
   const limiter = createLoginLimiter();
-  for (let i = 0; i < 20; i++) assert.equal(attemptLogin(`spoof-${i}`, "x", hashes, limiter), "invalid");
-  assert.equal(attemptLogin("alptug", "a-pass", hashes, limiter), "ok");
+  for (let i = 0; i < 20; i++) assert.equal(attemptLogin(`spoof-${i}`, "x", passwords, limiter), "invalid");
+  assert.equal(attemptLogin("alptug", "a-pass", passwords, limiter), "ok");
 });
 
-test("attemptLogin is invalid when the user's hash is not configured", () => {
-  assert.equal(attemptLogin("gamze", "g-pass", { alptug: hashes.alptug, gamze: undefined }, createLoginLimiter()), "invalid");
+test("attemptLogin is invalid when the user's password is not configured", () => {
+  assert.equal(attemptLogin("gamze", "", { alptug: "a-pass", gamze: undefined }, createLoginLimiter()), "invalid");
 });
