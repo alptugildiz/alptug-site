@@ -4,7 +4,8 @@ import { useActionState, useId } from "react";
 import { CATEGORIES } from "@/lib/giderler/categories.ts";
 import type { Expense } from "@/lib/giderler/store.ts";
 import { saveExpense, type FormState } from "./actions";
-import { button, errorText, field, label, primaryButton } from "./ui";
+import DatePicker from "./DatePicker";
+import { button, errorText, field, label, primaryButton, select } from "./ui";
 
 type Props = {
   /** YYYY-MM-DD used for new expenses */
@@ -45,19 +46,7 @@ export default function ExpenseForm({ defaultDate, expense, onDone }: Props) {
           className={field}
         />
       </div>
-      <div>
-        <label htmlFor={`${id}-date`} className={label}>
-          Tarih
-        </label>
-        <input
-          id={`${id}-date`}
-          name="date"
-          type="date"
-          required
-          defaultValue={v?.date ?? expense?.date ?? defaultDate}
-          className={field}
-        />
-      </div>
+      <DatePicker id={`${id}-date`} name="date" label="Tarih" defaultValue={v?.date ?? expense?.date ?? defaultDate} />
       <div className="col-span-2 sm:col-span-1">
         <label htmlFor={`${id}-category`} className={label}>
           Kategori
@@ -67,7 +56,7 @@ export default function ExpenseForm({ defaultDate, expense, onDone }: Props) {
           name="category"
           required
           defaultValue={v?.category ?? expense?.category ?? ""}
-          className={field}
+          className={select}
         >
           <option value="" disabled>
             Seç…

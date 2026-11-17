@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { USERS } from "@/lib/giderler/categories.ts";
 import { login, type FormState } from "./actions";
-import { errorText, field, label, primaryButton } from "./ui";
+import { errorText, field, label, primaryButton, select } from "./ui";
 
 export default function LoginForm() {
   const [state, action, pending] = useActionState<FormState, FormData>(login, {});
@@ -15,7 +15,7 @@ export default function LoginForm() {
         <label htmlFor="user" className={label}>
           Kim
         </label>
-        <select id="user" name="user" className={field} defaultValue="alptug">
+        <select id="user" name="user" className={select} defaultValue="alptug">
           {Object.entries(USERS).map(([id, name]) => (
             <option key={id} value={id}>
               {name}

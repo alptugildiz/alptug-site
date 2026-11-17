@@ -1,0 +1,63 @@
+/* ─── /giderler selects ──────────────────────────────── */
+/* fallback for browsers that keep the native picker: at least match the palette */
+.hud-select option {
+  background: var(--color-ink-2);
+  color: var(--color-cream);
+}
+
+/* Chromium's customizable <select>: the open list is styled like the rest of the HUD */
+@supports (appearance: base-select) {
+  .hud-select,
+  .hud-select::picker(select) {
+    appearance: base-select;
+  }
+
+  .hud-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    cursor: pointer;
+  }
+  .hud-select::picker-icon {
+    color: var(--color-cream-dim);
+    transition: rotate 0.15s;
+  }
+  .hud-select:open::picker-icon {
+    rotate: 180deg;
+  }
+
+  .hud-select::picker(select) {
+    margin-block: 6px;
+    padding: 4px;
+    border: 1px solid var(--color-line);
+    border-radius: 10px;
+    background: var(--color-ink-2);
+    color: var(--color-cream);
+    box-shadow: 0 12px 32px rgb(0 0 0 / 0.5);
+  }
+
+  .hud-select option {
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    background: transparent;
+    cursor: pointer;
+  }
+  .hud-select option:hover,
+  .hud-select option:focus-visible {
+    background: var(--color-line-soft);
+    outline: none;
+  }
+  .hud-select option:checked {
+    color: var(--color-signal);
+  }
+  .hud-select option::checkmark {
+    color: var(--color-signal);
+  }
+  /* the "Seç…" placeholder only belongs in the closed button */
+  .hud-select option[value=""] {
+    display: none;
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { field } from "./ui";
+import { select } from "./ui";
 
 const monthFormat = new Intl.DateTimeFormat("tr-TR", { month: "long", year: "numeric", timeZone: "UTC" });
 const formatMonth = (month: string) => monthFormat.format(new Date(`${month}-01T00:00:00Z`));
@@ -15,7 +15,7 @@ export default function MonthPicker({ months, value }: { months: string[]; value
       <select
         value={value}
         onChange={(e) => router.push(`/giderler?ay=${e.target.value}`)}
-        className={`${field} w-auto capitalize`}
+        className={`${select} w-auto capitalize`}
       >
         {months.map((m) => (
           <option key={m} value={m}>

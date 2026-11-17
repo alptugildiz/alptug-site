@@ -8,6 +8,7 @@ import LoginForm from "./LoginForm";
 import MonthPicker from "./MonthPicker";
 import OwnerSection from "./OwnerSection";
 import { button } from "./ui";
+import "./giderler.css";
 
 export const metadata: Metadata = {
   title: "Giderler",
@@ -31,7 +32,7 @@ export default async function GiderlerPage({ searchParams }: PageProps<"/giderle
   const owners: UserId[] = user === "alptug" ? ["alptug", "gamze"] : ["gamze", "alptug"];
 
   return (
-    <main className="mx-auto flex min-h-svh max-w-6xl flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
+    <main className="mx-auto flex min-h-svh max-w-[1920px] flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12 lg:px-12">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <h1 className="hud-label text-xl text-cream">Giderler</h1>
         <div className="flex flex-wrap items-center gap-3">

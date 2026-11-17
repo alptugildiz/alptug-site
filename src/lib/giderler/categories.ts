@@ -2,6 +2,7 @@ export const CATEGORIES = [
   { id: "ulasim", label: "Ulaşım" },
   { id: "kozmetik", label: "Kozmetik" },
   { id: "yemek", label: "Yemek" },
+  { id: "kira", label: "Kira" },
   { id: "faturalar", label: "Faturalar" },
   { id: "psikolog", label: "Psikolog" },
   { id: "spor", label: "Spor" },
