@@ -20,7 +20,7 @@ export default function ReportFilters({ range, person, presets }: Props) {
   const go = (next: Partial<Range>, nextPerson = person) => router.replace(reportHref({ ...range, ...next }, nextPerson));
 
   return (
-    <div className="panel flex flex-wrap items-end gap-4 p-4 print:hidden sm:p-5">
+    <div className="panel flex flex-wrap items-end gap-4 p-4 has-[[aria-expanded=true]]:z-20 print:hidden sm:p-5">
       {/* keyed by value so a preset click re-seeds the pickers */}
       <div className="w-40">
         <DatePicker key={`s-${range.start}`} id="rapor-bas" name="bas" label="Başlangıç" defaultValue={range.start} onChange={(start) => go({ start })} />

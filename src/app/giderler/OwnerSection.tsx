@@ -10,7 +10,7 @@ export default function OwnerSection({ owner, summary, editable, defaultDate }: 
   const headingId = `giderler-${owner}`;
 
   return (
-    <section aria-labelledby={headingId} className="panel flex flex-col gap-6 p-5 sm:p-6">
+    <section aria-labelledby={headingId} className="panel flex flex-col gap-6 p-5 has-[[aria-expanded=true]]:z-20 sm:p-6">
       <header className="flex items-end justify-between gap-4">
         <h2 id={headingId} className="hud-label text-base text-cream">
           {USERS[owner]}
