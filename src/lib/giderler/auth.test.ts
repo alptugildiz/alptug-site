@@ -19,7 +19,7 @@ test("verifyPassword accepts the right password and rejects the wrong one", () =
 });
 
 test("verifyPassword is false for missing or malformed hashes", () => {
-  for (const stored of [undefined, "", "garbage", "scrypt$zz$zz", "scrypt$abcd"]) {
+  for (const stored of [undefined, "", "garbage", "scrypt:zz:zz", "scrypt:abcd", "scrypt$ab$cd"]) {
     assert.equal(verifyPassword("gizli", stored), false, String(stored));
   }
 });
@@ -75,6 +75,10 @@ test("login limiter blocks after 5 failures until the window passes or reset", (
 
 test("scripts/gider-hash.mjs prints a hash verifyPassword accepts", () => {
   const out = execFileSync(process.execPath, ["scripts/gider-hash.mjs", "deneme"], { encoding: "utf8" }).trim();
-  assert.match(out, /^scrypt\$/);
+  assert.match(out, /^scrypt:[0-9a-f]+:[0-9a-f]+$/);
   assert.equal(verifyPassword("deneme", out), true);
+});
+
+test("hashes contain no $ so .env files don't expand them", () => {
+  assert.equal(hashPassword("x").includes("$"), false);
 });

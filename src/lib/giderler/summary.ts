@@ -40,7 +40,9 @@ export function summarize(expenses: Expense[], owner: UserId, month: string): Su
   return { items, byCategory, total: items.reduce((sum, e) => sum + e.amount, 0) };
 }
 
-export function availableMonths(expenses: Expense[], now = new Date()): string[] {
+/** Recorded months, the current one and the one being viewed — newest first, once each. */
+export function availableMonths(expenses: Expense[], now = new Date(), viewing?: string): string[] {
   const months = new Set([currentMonth(now), ...expenses.map((e) => e.date.slice(0, 7))]);
+  if (viewing) months.add(viewing);
   return [...months].sort().reverse();
 }

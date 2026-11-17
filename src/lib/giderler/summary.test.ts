@@ -62,3 +62,7 @@ test("availableMonths lists recorded months plus the current one, newest first, 
 test("today uses Istanbul time", () => {
   assert.equal(today(new Date("2026-11-30T22:30:00Z")), "2026-12-01");
 });
+
+test("availableMonths includes the month being viewed even with no expenses in it", () => {
+  assert.deepEqual(availableMonths([], new Date("2026-11-17T12:00:00Z"), "2026-08"), ["2026-11", "2026-08"]);
+});

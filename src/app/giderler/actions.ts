@@ -9,7 +9,8 @@ import { parseAmount } from "@/lib/giderler/money.ts";
 import { endSession, getUser, loginLimiter, sessionSecret, startSession } from "@/lib/giderler/session.ts";
 import { getStore, type ExpenseInput } from "@/lib/giderler/store.ts";
 
-export type FormState = { error?: string; ok?: number };
+/** `values` echoes the submission on error so the form can refill what React's reset cleared. */
+export type FormState = { error?: string; ok?: number; values?: Record<string, string> };
 
 const PASSWORD_ENV: Record<UserId, string> = {
   alptug: "GIDER_ALPTUG_PASSWORD_HASH",
@@ -49,21 +50,26 @@ function isValidDate(x: unknown): x is string {
 }
 
 export async function saveExpense(prev: FormState, formData: FormData): Promise<FormState> {
+  const values = Object.fromEntries(
+    ["date", "amount", "category", "note"].map((k) => [k, String(formData.get(k) ?? "")]),
+  );
+  const fail = (error: string): FormState => ({ ...prev, error, values });
+
   const user = await getUser();
-  if (!user) return { error: "Oturum süresi doldu." };
+  if (!user) return fail("Oturum süresi doldu.");
 
-  const amount = parseAmount(String(formData.get("amount") ?? ""));
-  if (amount === null) return { error: "Tutar geçersiz. Örnek: 89,90" };
-  const category = formData.get("category");
-  if (!isCategory(category)) return { error: "Kategori seç." };
-  const date = formData.get("date");
-  if (!isValidDate(date)) return { error: "Tarih geçersiz." };
+  const amount = parseAmount(values.amount);
+  if (amount === null) return fail("Tutar geçersiz. Örnek: 89,90");
+  const category = values.category;
+  if (!isCategory(category)) return fail("Kategori seç.");
+  const date = values.date;
+  if (!isValidDate(date)) return fail("Tarih geçersiz.");
 
-  const input: ExpenseInput = { date, amount, category, note: String(formData.get("note") ?? "") };
+  const input: ExpenseInput = { date, amount, category, note: values.note };
   const id = formData.get("id");
   const store = getStore();
   if (typeof id === "string" && id) {
-    if (!(await store.update(user, id, input))) return { error: NOT_YOURS };
+    if (!(await store.update(user, id, input))) return fail(NOT_YOURS);
   } else {
     await store.add(user, input);
   }

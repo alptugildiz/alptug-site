@@ -7,15 +7,15 @@ const KEY_BYTES = 64;
 
 export const SESSION_MAX_AGE_S = 60 * 60 * 24 * 30;
 
-/** → "scrypt$<saltHex>$<hashHex>", the format stored in GIDER_*_PASSWORD_HASH. */
+/** → "scrypt:<saltHex>:<hashHex>" (no "$", which .env files would expand), the format stored in GIDER_*_PASSWORD_HASH. */
 export function hashPassword(password: string): string {
   const salt = randomBytes(SALT_BYTES);
   const hash = scryptSync(password, salt, KEY_BYTES);
-  return `scrypt$${salt.toString("hex")}$${hash.toString("hex")}`;
+  return `scrypt:${salt.toString("hex")}:${hash.toString("hex")}`;
 }
 
 export function verifyPassword(password: string, stored: string | undefined): boolean {
-  const [scheme, saltHex, hashHex] = stored?.split("$") ?? [];
+  const [scheme, saltHex, hashHex] = stored?.split(":") ?? [];
   if (scheme !== "scrypt" || !saltHex || !hashHex) return false;
 
   const expected = Buffer.from(hashHex, "hex");
