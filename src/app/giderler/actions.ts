@@ -1,10 +1,9 @@
 "use server";
 
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { verifyPassword } from "@/lib/giderler/auth.ts";
-import { isCategory, isUser, type UserId } from "@/lib/giderler/categories.ts";
+import { attemptLogin } from "@/lib/giderler/auth.ts";
+import { isCategory, isUser } from "@/lib/giderler/categories.ts";
 import { parseAmount } from "@/lib/giderler/money.ts";
 import { endSession, getUser, loginLimiter, sessionSecret, startSession } from "@/lib/giderler/session.ts";
 import { getStore, type ExpenseInput } from "@/lib/giderler/store.ts";
@@ -12,28 +11,21 @@ import { getStore, type ExpenseInput } from "@/lib/giderler/store.ts";
 /** `values` echoes the submission on error so the form can refill what React's reset cleared. */
 export type FormState = { error?: string; ok?: number; values?: Record<string, string> };
 
-const PASSWORD_ENV: Record<UserId, string> = {
-  alptug: "GIDER_ALPTUG_PASSWORD_HASH",
-  gamze: "GIDER_GAMZE_PASSWORD_HASH",
-};
-
 const NOT_YOURS = "Bu kaydı düzenleyemezsin.";
 
 export async function login(_prev: FormState, formData: FormData): Promise<FormState> {
   if (!sessionSecret()) return { error: "Sunucu yapılandırılmamış." };
 
   const user = formData.get("user");
-  const password = String(formData.get("password") ?? "");
-  const ip = (await headers()).get("x-forwarded-for")?.split(",")[0]?.trim() ?? "local";
-  const key = `${String(user)}|${ip}`;
+  const hashes = {
+    alptug: process.env.GIDER_ALPTUG_PASSWORD_HASH,
+    gamze: process.env.GIDER_GAMZE_PASSWORD_HASH,
+  };
+  const result = attemptLogin(user, String(formData.get("password") ?? ""), hashes, loginLimiter);
 
-  if (!loginLimiter.check(key)) return { error: "Çok fazla deneme. 15 dakika sonra tekrar dene." };
-  if (!isUser(user) || !verifyPassword(password, process.env[PASSWORD_ENV[user]])) {
-    loginLimiter.fail(key);
-    return { error: "Kullanıcı adı veya şifre hatalı." };
-  }
+  if (result === "limited") return { error: "Çok fazla deneme. 15 dakika sonra tekrar dene." };
+  if (result === "invalid" || !isUser(user)) return { error: "Kullanıcı adı veya şifre hatalı." };
 
-  loginLimiter.reset(key);
   await startSession(user);
   redirect("/giderler");
 }

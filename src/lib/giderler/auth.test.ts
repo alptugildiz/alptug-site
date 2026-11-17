@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import {
+  attemptLogin,
   createLoginLimiter,
   hashPassword,
   SESSION_MAX_AGE_S,
@@ -81,4 +82,27 @@ test("scripts/gider-hash.mjs prints a hash verifyPassword accepts", () => {
 
 test("hashes contain no $ so .env files don't expand them", () => {
   assert.equal(hashPassword("x").includes("$"), false);
+});
+
+const hashes = { alptug: hashPassword("a-pass"), gamze: hashPassword("g-pass") };
+
+test("attemptLogin accepts the right user and password", () => {
+  assert.equal(attemptLogin("alptug", "a-pass", hashes, createLoginLimiter()), "ok");
+});
+
+test("attemptLogin rate-limits per user, so nothing the client sends gets around it", () => {
+  const limiter = createLoginLimiter();
+  for (let i = 0; i < 5; i++) assert.equal(attemptLogin("alptug", "guess", hashes, limiter), "invalid");
+  assert.equal(attemptLogin("alptug", "a-pass", hashes, limiter), "limited");
+  assert.equal(attemptLogin("gamze", "g-pass", hashes, limiter), "ok");
+});
+
+test("attemptLogin rejects unknown users without counting them against anyone", () => {
+  const limiter = createLoginLimiter();
+  for (let i = 0; i < 20; i++) assert.equal(attemptLogin(`spoof-${i}`, "x", hashes, limiter), "invalid");
+  assert.equal(attemptLogin("alptug", "a-pass", hashes, limiter), "ok");
+});
+
+test("attemptLogin is invalid when the user's hash is not configured", () => {
+  assert.equal(attemptLogin("gamze", "g-pass", { alptug: hashes.alptug, gamze: undefined }, createLoginLimiter()), "invalid");
 });

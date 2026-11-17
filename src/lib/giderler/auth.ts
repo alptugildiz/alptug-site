@@ -72,3 +72,26 @@ export function createLoginLimiter(max = 5, windowMs = 15 * 60_000) {
     },
   };
 }
+
+export type LoginLimiter = ReturnType<typeof createLoginLimiter>;
+
+/**
+ * Keyed by user, not by IP: X-Forwarded-For is client-controlled, and with only two accounts
+ * the limiter map stays bounded and scrypt never runs for made-up user names.
+ */
+export function attemptLogin(
+  user: unknown,
+  password: string,
+  hashes: Record<UserId, string | undefined>,
+  limiter: LoginLimiter,
+  now = Date.now(),
+): "ok" | "invalid" | "limited" {
+  if (!isUser(user)) return "invalid";
+  if (!limiter.check(user, now)) return "limited";
+  if (!verifyPassword(password, hashes[user])) {
+    limiter.fail(user, now);
+    return "invalid";
+  }
+  limiter.reset(user);
+  return "ok";
+}
