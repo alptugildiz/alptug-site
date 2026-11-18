@@ -109,7 +109,7 @@ export default function DatePicker({ id, name, label, defaultValue, onChange }: 
         className={`${field} flex items-center justify-between gap-2 text-left`}
       >
         <span className="truncate whitespace-nowrap">{shortDate.format(asDate(value))}</span>
-        <svg aria-hidden width="14" height="14" viewBox="0 0 14 14" className="shrink-0 text-cream-dim">
+        <svg aria-hidden width="14" height="14" viewBox="0 0 14 14" className="hidden shrink-0 text-cream-dim sm:block">
           <rect x="1.5" y="2.5" width="11" height="10" rx="1.5" fill="none" stroke="currentColor" />
           <path d="M1.5 5.5h11M4.5 1v3M9.5 1v3" stroke="currentColor" />
         </svg>

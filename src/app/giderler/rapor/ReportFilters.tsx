@@ -22,13 +22,13 @@ export default function ReportFilters({ range, person, presets }: Props) {
   return (
     <div className="panel flex flex-wrap items-end gap-4 p-4 has-[[aria-expanded=true]]:z-20 print:hidden sm:p-5">
       {/* keyed by value so a preset click re-seeds the pickers */}
-      <div className="w-40">
+      <div className="w-[calc(50%-0.5rem)] sm:w-40">
         <DatePicker key={`s-${range.start}`} id="rapor-bas" name="bas" label="Başlangıç" defaultValue={range.start} onChange={(start) => go({ start })} />
       </div>
-      <div className="w-40">
+      <div className="w-[calc(50%-0.5rem)] sm:w-40">
         <DatePicker key={`e-${range.end}`} id="rapor-bit" name="bit" label="Bitiş" defaultValue={range.end} onChange={(end) => go({ end })} />
       </div>
-      <div className="w-36">
+      <div className="w-full sm:w-36">
         <label htmlFor="rapor-kisi" className={label}>
           Kişi
         </label>
