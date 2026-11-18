@@ -12,7 +12,9 @@ const longDate = fmt({ day: "numeric", month: "long", year: "numeric" });
 const shortDate = fmt({ day: "numeric", month: "short", year: "numeric" });
 const monthTitle = fmt({ month: "long", year: "numeric" });
 const asDate = (iso: string) => new Date(`${iso}T00:00:00Z`);
-const WEEKDAYS = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
+// matches the popover's w-[17.5rem]
+const POPOVER_PX = 280;
+const WEEKDAYS =["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
 
 function shiftDay(iso: string, delta: number): string {
   const d = asDate(iso);
@@ -25,6 +27,8 @@ export default function DatePicker({ id, name, label, defaultValue, onChange }: 
   const initial = /^\d{4}-\d{2}-\d{2}$/.test(defaultValue) && !Number.isNaN(asDate(defaultValue).getTime()) ? defaultValue : today();
   const [value, setValue] = useState(initial);
   const [open, setOpen] = useState(false);
+  // open towards whichever side has room, so the popover never runs off a phone screen
+  const [alignRight, setAlignRight] = useState(false);
   // the day keyboard focus sits on; its month is the one shown
   const [active, setActive] = useState(initial);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -96,7 +100,9 @@ export default function DatePicker({ id, name, label, defaultValue, onChange }: 
         aria-haspopup="dialog"
         aria-expanded={open}
         aria-labelledby={`${id}-label ${id}`}
-        onClick={() => {
+        onClick={(e) => {
+          const rect = e.currentTarget.getBoundingClientRect();
+          setAlignRight(rect.left + POPOVER_PX > document.documentElement.clientWidth - 8);
           setActive(value);
           setOpen((o) => !o);
         }}
@@ -114,7 +120,7 @@ export default function DatePicker({ id, name, label, defaultValue, onChange }: 
           role="dialog"
           aria-modal="false"
           aria-labelledby={titleId}
-          className="absolute right-0 top-full z-30 mt-2 w-[17.5rem] rounded-[10px] border border-line bg-ink-2 p-3 shadow-[0_12px_32px_rgb(0_0_0/0.5)] sm:left-0 sm:right-auto"
+          className={`absolute top-full z-30 mt-2 w-[min(17.5rem,calc(100vw-2rem))] rounded-[10px] border border-line bg-ink-2 p-3 shadow-[0_12px_32px_rgb(0_0_0/0.5)] ${alignRight ? "right-0" : "left-0"}`}
         >
           <div className="mb-2 flex items-center justify-between">
             <button

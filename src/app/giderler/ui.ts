@@ -1,6 +1,7 @@
 // shared Tailwind class strings for the giderler forms
+// 16px on phones: iOS zooms the page into any focused field with a smaller font and doesn't zoom back
 export const field =
-  "w-full rounded-md border border-line-soft bg-ink px-3 py-2 font-mono text-sm text-cream placeholder:text-cream-mute focus:border-cream";
+  "w-full rounded-md border border-line-soft bg-ink px-3 py-2 font-mono text-base text-cream placeholder:text-cream-mute focus:border-cream sm:text-sm";
 export const label = "hud-label mb-1.5 block text-[11px] text-cream-dim";
 export const button =
   "hud-label rounded-md border border-line px-4 py-2.5 text-xs text-cream transition-colors hover:bg-cream hover:text-ink disabled:opacity-50";
